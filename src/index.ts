@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import clientPromise from './lib/db/mongodb';
+import propertyRoutes from './routes/property.routes';
 
 dotenv.config();
 
@@ -21,6 +22,8 @@ app.get('/api/health', (_req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+app.use('/api/properties', propertyRoutes);
 
 const startServer = async () => {
   try {
