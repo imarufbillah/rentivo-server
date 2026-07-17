@@ -3,6 +3,7 @@ import { vi } from 'vitest';
 const createMockCollection = () => ({
   find: vi.fn().mockReturnThis(),
   findOne: vi.fn().mockResolvedValue(null),
+  aggregate: vi.fn().mockReturnThis(),
   insertOne: vi.fn().mockResolvedValue({ insertedId: { toString: () => '507f1f77bcf86cd799439011' } }),
   findOneAndUpdate: vi.fn().mockResolvedValue(null),
   deleteOne: vi.fn().mockResolvedValue({ deletedCount: 1 }),
@@ -33,6 +34,7 @@ export const resetMocks = () => {
   // Restore chainable mocks for all collections
   Object.values(mockCollections).forEach((col) => {
     col.find.mockReturnThis();
+    col.aggregate.mockReturnThis();
     col.project.mockReturnThis();
     col.sort.mockReturnThis();
     col.skip.mockReturnThis();
