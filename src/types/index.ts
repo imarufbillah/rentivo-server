@@ -1,10 +1,17 @@
 import { ObjectId } from 'mongodb';
 
+export type PropertyType = 'apartment' | 'house' | 'room' | 'studio' | 'villa';
+export type PropertyStatus = 'active' | 'pending' | 'archived';
+export type InteractionType = 'view' | 'save' | 'dismiss';
+export type UserRole = 'renter' | 'owner';
+export type SortField = 'price' | 'createdAt';
+export type SortOrder = 'asc' | 'desc';
+
 export interface User {
   _id?: ObjectId;
   email: string;
   passwordHash?: string;
-  role: 'renter' | 'owner';
+  role: UserRole;
   name?: string;
   avatar?: string;
   oauthProvider?: 'google';
@@ -19,9 +26,9 @@ export interface Property {
   description: string;
   price: number;
   location: string;
-  propertyType: 'apartment' | 'house' | 'room' | 'studio' | 'villa';
+  propertyType: PropertyType;
   images: string[];
-  status: 'active' | 'pending' | 'archived';
+  status: PropertyStatus;
   ownerId: ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -31,7 +38,7 @@ export interface Interaction {
   _id?: ObjectId;
   userId: ObjectId;
   propertyId: ObjectId;
-  type: 'view' | 'save' | 'dismiss';
+  type: InteractionType;
   createdAt: Date;
 }
 
@@ -48,4 +55,54 @@ export interface Review {
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
+}
+
+export interface CreatePropertyDTO {
+  title: string;
+  description: string;
+  price: number;
+  location: string;
+  propertyType: PropertyType;
+  images: string[];
+  status?: PropertyStatus;
+}
+
+export type UpdatePropertyDTO = Partial<CreatePropertyDTO>;
+
+export interface PropertyFilters {
+  search?: string;
+  location?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  propertyType?: PropertyType;
+  sortBy?: SortField;
+  sortOrder?: SortOrder;
+}
+
+export interface Pagination {
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginatedResult<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface RecommendationFilters {
+  location?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  propertyType?: PropertyType;
+}
+
+export interface RecommendedProperty {
+  property: Property;
+  explanation: string;
+  score?: number;
 }
