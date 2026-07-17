@@ -30,26 +30,23 @@ export const resetMocks = () => {
     });
   });
 
-  // Restore chainable mocks
-  mockCollections.properties.find.mockReturnThis();
-  mockCollections.properties.project.mockReturnThis();
-  mockCollections.properties.sort.mockReturnThis();
-  mockCollections.properties.skip.mockReturnThis();
-  mockCollections.properties.limit.mockReturnThis();
-  mockCollections.properties.toArray.mockResolvedValue([]);
-
-  // Restore default return values
-  mockCollections.properties.countDocuments.mockResolvedValue(0);
-  mockCollections.properties.findOne.mockResolvedValue(null);
-  mockCollections.properties.insertOne.mockResolvedValue({
-    insertedId: { toString: () => '507f1f77bcf86cd799439011', equals: (id: any) => id?.toString?.() === '507f1f77bcf86cd799439011' },
+  // Restore chainable mocks for all collections
+  Object.values(mockCollections).forEach((col) => {
+    col.find.mockReturnThis();
+    col.project.mockReturnThis();
+    col.sort.mockReturnThis();
+    col.skip.mockReturnThis();
+    col.limit.mockReturnThis();
+    col.toArray.mockResolvedValue([]);
+    col.countDocuments.mockResolvedValue(0);
+    col.findOne.mockResolvedValue(null);
+    col.insertOne.mockResolvedValue({
+      insertedId: { toString: () => '507f1f77bcf86cd799439011', equals: (id: any) => id?.toString?.() === '507f1f77bcf86cd799439011' },
+    });
+    col.deleteOne.mockResolvedValue({ deletedCount: 1 });
+    col.deleteMany.mockResolvedValue({ deletedCount: 0 });
+    col.createIndex.mockResolvedValue('');
   });
-  mockCollections.properties.findOneAndUpdate.mockResolvedValue(null);
-  mockCollections.properties.deleteOne.mockResolvedValue({ deletedCount: 1 });
-  mockCollections.properties.deleteMany.mockResolvedValue({ deletedCount: 0 });
-  mockCollections.properties.createIndex.mockResolvedValue('');
-  mockCollections.interactions.deleteMany.mockResolvedValue({ deletedCount: 0 });
-  mockCollections.reviews.deleteMany.mockResolvedValue({ deletedCount: 0 });
 };
 
 vi.mock('../lib/db/collections', () => ({
