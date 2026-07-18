@@ -55,7 +55,7 @@ export const sendMessage = async function* (
   const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
   const stream = await client.chat.completions.create({
-    model: 'llama3-70b-8192',
+    model: 'llama-3.3-70b-versatile',
     messages,
     tools,
     stream: true,
@@ -132,7 +132,7 @@ export const sendMessage = async function* (
     ];
 
     const followUp = await client.chat.completions.create({
-      model: 'llama3-70b-8192',
+      model: 'llama-3.3-70b-versatile',
       messages: toolMessages,
       stream: true,
     });
@@ -165,7 +165,7 @@ ${JSON.stringify(history.slice(-4), null, 2)}
 Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
 
   const response = await client.chat.completions.create({
-    model: 'llama3-70b-8192',
+    model: 'llama-3.3-70b-versatile',
     messages: [{ role: 'user', content: prompt }],
     response_format: { type: 'json_object' },
   });

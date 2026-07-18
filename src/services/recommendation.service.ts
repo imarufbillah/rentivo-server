@@ -119,7 +119,7 @@ export const rankWithLLM = async (
   const prompt = buildRankingPrompt(candidatePool, interactions);
 
   const response = await client.chat.completions.create({
-    model: 'llama3-70b-8192',
+    model: 'llama-3.3-70b-versatile',
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },
       { role: 'user', content: prompt },
@@ -154,7 +154,7 @@ export const generateExplanations = async (
       const prompt = buildExplanationPrompt(rec.property, interactions);
 
       const response = await client.chat.completions.create({
-        model: 'llama3-70b-8192',
+        model: 'llama-3.3-70b-versatile',
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.5,
         max_tokens: 50,
