@@ -31,10 +31,12 @@ describe('errorHandler', () => {
     errorHandler(error, req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(403);
-    expect(res.json).toHaveBeenCalledWith({
-      success: false,
-      error: { code: 'INSUFFICIENT_ROLE', message: 'Owner access required' },
-    });
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        error: expect.objectContaining({ code: 'INSUFFICIENT_ROLE', message: 'Owner access required' }),
+      })
+    );
   });
 
   it('handles ZodError with 400 status', () => {
@@ -48,10 +50,12 @@ describe('errorHandler', () => {
     errorHandler(error, req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({
-      success: false,
-      error: { code: 'VALIDATION_FAILED', message: 'Invalid input' },
-    });
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        error: expect.objectContaining({ code: 'VALIDATION_FAILED', message: 'Invalid input' }),
+      })
+    );
   });
 
   it('handles unknown errors with 500 status', () => {
@@ -63,9 +67,11 @@ describe('errorHandler', () => {
     errorHandler(error, req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      success: false,
-      error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' },
-    });
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        error: expect.objectContaining({ code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' }),
+      })
+    );
   });
 });

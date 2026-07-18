@@ -1,15 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-import { jwtVerify, decodeJwt } from 'jose';
+import { jwtVerify, createRemoteJWKSet, decodeJwt } from 'jose';
 import { clearConversationHistory } from '../services/chat.service';
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
-const getSecretKey = () => {
-  if (!JWT_SECRET) {
-    throw new Error('JWT_SECRET environment variable is not defined');
-  }
-  return new TextEncoder().encode(JWT_SECRET);
-};
+const AUTH_BASE_URL = process.env.AUTH_BASE_URL || 'http://localhost:3000';
+const JWKS_URL = `${AUTH_BASE_URL}/api/auth/jwks`;
+const JWKS = createRemoteJWKSet(new URL(JWKS_URL));
 
 export interface AuthenticatedUser {
   id: string;
@@ -29,7 +24,7 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
       if (process.env.NODE_ENV !== 'production') {
-        console.error('🔒 Auth failed: No Bearer token in Authorization header');
+        console.error('🔒 Auth failed: No Bearer token provided');
       }
       return res.status(401).json({
         success: false,
@@ -38,9 +33,10 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     }
 
     const token = authHeader.split(' ')[1];
-    const secretKey = getSecretKey();
 
-    const { payload } = await jwtVerify(token, secretKey);
+    const { payload } = await jwtVerify(token, JWKS, {
+      issuer: AUTH_BASE_URL,
+    });
 
     req.user = {
       id: payload.sub as string,
@@ -50,7 +46,7 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     };
 
     if (process.env.NODE_ENV !== 'production') {
-      console.log('✓ Auth success:', req.user.email, `(${req.user.role})`);
+      console.log(`✓ Auth success: ${req.user.email} (${req.user.role})`);
     }
 
     next();
