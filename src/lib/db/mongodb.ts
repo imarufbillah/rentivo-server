@@ -12,9 +12,6 @@ const options: MongoClientOptions = {
   retryWrites: true,
   retryReads: true,
   heartbeatFrequencyMS: 10000,
-  tls: true,
-  tlsAllowInvalidCertificates: false,
-  tlsAllowInvalidHostnames: false,
 };
 
 let client: MongoClient;
