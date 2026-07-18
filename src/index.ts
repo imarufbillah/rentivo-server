@@ -5,6 +5,7 @@ import clientPromise from './lib/db/mongodb';
 import propertyRoutes from './routes/property.routes';
 import interactionRoutes from './routes/interaction.routes';
 import reviewRoutes from './routes/review.routes';
+import recommendationRoutes from './routes/recommendation.routes';
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.get('/api/health', (_req, res) => {
 app.use('/api/properties', propertyRoutes);
 app.use('/api/interactions', interactionRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/recommendations', recommendationRoutes);
 
 const startServer = async () => {
   try {
