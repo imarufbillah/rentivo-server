@@ -2,10 +2,13 @@ import { MongoClient, ObjectId } from 'mongodb';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 
-dotenv.config();
+dotenv.config({ path: '.env.local' });
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/rentivo';
 const SALT_ROUNDS = 10;
+
+const isAtlas = MONGODB_URI.includes('mongodb+srv');
+const clientOptions = isAtlas ? { tls: true } : {};
 
 const demoProperties = [
   {
@@ -134,7 +137,7 @@ const reviewComments = [
 ];
 
 const seed = async () => {
-  const client = new MongoClient(MONGODB_URI);
+  const client = new MongoClient(MONGODB_URI, clientOptions);
 
   try {
     await client.connect();

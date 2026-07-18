@@ -1,6 +1,6 @@
+import './config';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import clientPromise from './lib/db/mongodb';
 import { errorHandler } from './middleware/error-handler';
 import propertyRoutes from './routes/property.routes';
@@ -9,8 +9,6 @@ import reviewRoutes from './routes/review.routes';
 import recommendationRoutes from './routes/recommendation.routes';
 import chatRoutes from './routes/chat.routes';
 import userRoutes from './routes/user.routes';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
