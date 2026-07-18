@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "nodemon dist/index.js",
+    "start": "tsx src/index.ts",
     "test": "vitest run",
     "seed": "tsx src/seed.ts"
   },
