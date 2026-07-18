@@ -1,21 +1,22 @@
 import { ChatMessage } from '../types';
 import { tools, executeToolCall } from './chat-tools';
 
-const SYSTEM_PROMPT = `You are a helpful real estate assistant for Rentivo, a property rental platform. You help users find rental properties, answer questions about listings, and provide information about saved properties.
+const SYSTEM_PROMPT = `You are a helpful real estate assistant for Rentivo, a property rental platform in New York City. You help users find rental properties, answer questions about listings, and provide information about saved properties.
 
 You have access to three tools:
-1. searchProperties - Search for properties by criteria
-2. getPropertyDetails - Get detailed info about a specific property
-3. getUserSavedProperties - Get the user's saved/favorited properties
+1. searchProperties - Search for properties by criteria (location, price, type). ONLY call this when the user explicitly wants to find, see, or browse properties.
+2. getPropertyDetails - Get detailed info about a specific property by its ID. ONLY call this when the user asks about a specific property they've already seen.
+3. getUserSavedProperties - Get the user's saved/favorited properties. ONLY call this when the user asks about their saved or favorited listings.
 
-Guidelines:
-- Always use tools to fetch current data rather than making assumptions
-- Be concise but informative
-- If a tool call fails, explain clearly what went wrong
-- Never fabricate property data
-- When showing multiple properties, limit to 3-5 in your response
-- Format prices with dollar signs and commas
-- Use a friendly, professional tone`;
+Rules:
+- NEVER fabricate property listings, prices, or availability — always use tools for real data
+- Use tools ONLY when the user's request requires fetching data from the database
+- For general questions about renting, neighborhoods, or real estate advice — answer directly from your knowledge WITHOUT calling any tool
+- When showing search results, format as a numbered list with title, location, price, and type
+- Format prices with dollar signs and commas (e.g. $2,500/mo)
+- Use a friendly, professional tone
+- If the user's request is ambiguous, ask a clarifying question
+- Always respond in the same language the user writes in`;
 
 const MAX_HISTORY = 20;
 
@@ -34,29 +35,18 @@ const addToConversationHistory = (sessionId: string, message: ChatMessage) => {
   conversationStore.set(sessionId, history);
 };
 
-export const sendMessage = async function* (
-  userId: string,
-  message: string,
-  history: ChatMessage[]
-): AsyncGenerator<string> {
-  const sessionId = userId;
-  const conversationHistory = getConversationHistory(sessionId);
-
-  const messages = [
-    { role: 'system' as const, content: SYSTEM_PROMPT },
-    ...conversationHistory,
-    ...history,
-    { role: 'user' as const, content: message },
-  ];
-
-  addToConversationHistory(sessionId, { role: 'user', content: message });
-
+const createClient = async () => {
   const Groq = (await import('groq-sdk')).default;
-  const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
+  return new Groq({ apiKey: process.env.GROQ_API_KEY });
+};
 
+const streamChat = async function* (
+  client: Awaited<ReturnType<typeof createClient>>,
+  msgs: { role: 'system' | 'user' | 'assistant' | 'tool'; content: string | null; tool_calls?: unknown[]; tool_call_id?: string }[]
+): AsyncGenerator<string> {
   const stream = await client.chat.completions.create({
     model: 'llama-3.3-70b-versatile',
-    messages,
+    messages: msgs,
     tools,
     stream: true,
   });
@@ -64,30 +54,84 @@ export const sendMessage = async function* (
   let fullContent = '';
   const toolCalls = new Map<number, { id: string; name: string; arguments: string }>();
 
-  for await (const chunk of stream) {
-    const delta = chunk.choices[0]?.delta;
+  try {
+    for await (const chunk of stream) {
+      const delta = chunk.choices[0]?.delta;
 
-    if (delta?.tool_calls) {
-      for (const tc of delta.tool_calls) {
-        const index = tc.index ?? 0;
-        const existing = toolCalls.get(index);
+      if (delta?.tool_calls) {
+        for (const tc of delta.tool_calls) {
+          const index = tc.index ?? 0;
+          const existing = toolCalls.get(index);
 
-        if (existing) {
-          existing.arguments += tc.function?.arguments || '';
-        } else {
-          toolCalls.set(index, {
-            id: tc.id || '',
-            name: tc.function?.name || '',
-            arguments: tc.function?.arguments || '',
-          });
+          if (existing) {
+            existing.arguments += tc.function?.arguments || '';
+          } else {
+            toolCalls.set(index, {
+              id: tc.id || '',
+              name: tc.function?.name || '',
+              arguments: tc.function?.arguments || '',
+            });
+          }
         }
       }
+
+      if (delta?.content) {
+        fullContent += delta.content;
+        yield JSON.stringify({ type: 'token', content: delta.content });
+      }
+    }
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Unknown stream error';
+
+    if (msg.includes('tool call validation failed') || msg.includes('did not match schema')) {
+      yield JSON.stringify({
+        type: 'error',
+        message: 'I had trouble forming that search. Let me try a simpler query.',
+      });
+      return;
     }
 
-    if (delta?.content) {
-      fullContent += delta.content;
-      yield JSON.stringify({ type: 'token', content: delta.content });
+    throw error;
+  }
+
+  return { fullContent, toolCalls };
+};
+
+export const sendMessage = async function* (
+  userId: string,
+  message: string,
+  history: ChatMessage[]
+): AsyncGenerator<string> {
+  const sessionId = userId;
+  const conversationHistory = getConversationHistory(sessionId);
+  const client = await createClient();
+
+  const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
+    { role: 'system', content: SYSTEM_PROMPT },
+    ...conversationHistory,
+    ...history,
+    { role: 'user', content: message },
+  ];
+
+  addToConversationHistory(sessionId, { role: 'user', content: message });
+
+  let fullContent = '';
+  const toolCalls = new Map<string, { id: string; name: string; arguments: string }>();
+
+  try {
+    const result = yield* streamChat(client, messages);
+    if (!result) {
+      yield JSON.stringify({ type: 'done' });
+      return;
     }
+
+    fullContent = result.fullContent;
+    for (const [index, tc] of result.toolCalls) {
+      toolCalls.set(tc.id || String(index), tc);
+    }
+  } catch {
+    yield JSON.stringify({ type: 'done' });
+    return;
   }
 
   if (toolCalls.size > 0) {
@@ -98,10 +142,10 @@ export const sendMessage = async function* (
 
       try {
         const args = JSON.parse(tc.arguments);
-        const result = await executeToolCall(tc.name, args, userId);
-        const resultContent = JSON.stringify(result);
+        const toolResult = await executeToolCall(tc.name, args, userId);
+        const resultContent = JSON.stringify(toolResult);
         toolResults.set(tc.id, resultContent);
-        yield JSON.stringify({ type: 'tool_result', result });
+        yield JSON.stringify({ type: 'tool_result', result: toolResult });
 
         addToConversationHistory(sessionId, {
           role: 'assistant',
@@ -117,7 +161,7 @@ export const sendMessage = async function* (
       }
     }
 
-    const toolMessages: any[] = [
+    const toolMessages: { role: string; content: string | null; tool_calls?: unknown[]; tool_call_id?: string }[] = [
       ...messages,
       ...Array.from(toolCalls.values()).map((tc) => ({
         role: 'assistant',
@@ -131,22 +175,29 @@ export const sendMessage = async function* (
       })),
     ];
 
-    const followUp = await client.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
-      messages: toolMessages,
-      stream: true,
-    });
-
     let followUpContent = '';
-    for await (const chunk of followUp) {
-      const delta = chunk.choices[0]?.delta;
-      if (delta?.content) {
-        followUpContent += delta.content;
-        yield JSON.stringify({ type: 'token', content: delta.content });
+    try {
+      const followUp = await client.chat.completions.create({
+        model: 'llama-3.3-70b-versatile',
+        messages: toolMessages,
+        stream: true,
+      });
+
+      for await (const chunk of followUp) {
+        const delta = chunk.choices[0]?.delta;
+        if (delta?.content) {
+          followUpContent += delta.content;
+          yield JSON.stringify({ type: 'token', content: delta.content });
+        }
       }
+    } catch {
+      yield JSON.stringify({
+        type: 'token',
+        content: '\n\nI found some results but had trouble summarizing them. Please try asking again.',
+      });
     }
 
-    addToConversationHistory(sessionId, { role: 'assistant', content: followUpContent });
+    addToConversationHistory(sessionId, { role: 'assistant', content: followUpContent || 'I found some results for you.' });
   } else {
     addToConversationHistory(sessionId, { role: 'assistant', content: fullContent });
   }
@@ -155,22 +206,22 @@ export const sendMessage = async function* (
 };
 
 export const generateFollowUpSuggestions = async (history: ChatMessage[]): Promise<string[]> => {
-  const Groq = (await import('groq-sdk')).default;
-  const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
+  const client = await createClient();
 
-  const prompt = `Based on this conversation, suggest 2-3 short follow-up questions the user might ask (max 8 words each):
+  const prompt = `Based on this conversation about rental properties, suggest 2-3 short follow-up questions the user might ask (max 8 words each).
 
+Conversation:
 ${JSON.stringify(history.slice(-4), null, 2)}
 
-Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
-
-  const response = await client.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
-    messages: [{ role: 'user', content: prompt }],
-    response_format: { type: 'json_object' },
-  });
+Return ONLY a JSON object: {"suggestions": ["question 1", "question 2", "question 3"]}`;
 
   try {
+    const response = await client.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
+      messages: [{ role: 'user', content: prompt }],
+      response_format: { type: 'json_object' },
+    });
+
     const result = JSON.parse(response.choices[0]?.message?.content || '{"suggestions":[]}');
     return result.suggestions || [];
   } catch {

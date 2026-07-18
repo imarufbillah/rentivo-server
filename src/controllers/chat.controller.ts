@@ -28,7 +28,6 @@ export const sendMessage = async (req: Request, res: Response) => {
 
     res.end();
   } catch (error) {
-    // Log error details in development
     if (process.env.NODE_ENV !== 'production') {
       console.error('\n❌ Chat error caught:');
       console.error('User:', req.user?.email);
@@ -37,6 +36,12 @@ export const sendMessage = async (req: Request, res: Response) => {
         console.error('Stack:', error.stack);
       }
       console.error('---\n');
+    }
+
+    if (res.headersSent) {
+      res.write(`data: ${JSON.stringify({ type: 'error', message: 'An error occurred while processing your message.' })}\n\n`);
+      res.end();
+      return;
     }
 
     const isLLMError = error instanceof Error && (
