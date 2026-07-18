@@ -121,7 +121,7 @@ export const searchProperties = async (
   }
 
   if (filters.location) {
-    filter.location = filters.location;
+    filter.location = { $regex: filters.location, $options: 'i' };
   }
 
   if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {

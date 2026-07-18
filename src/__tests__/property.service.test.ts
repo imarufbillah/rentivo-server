@@ -123,7 +123,7 @@ describe('searchProperties', () => {
     await searchProperties({ location: 'New York' }, {});
 
     expect(mockCollections.properties.find).toHaveBeenCalledWith(
-      expect.objectContaining({ location: 'New York' })
+      expect.objectContaining({ location: { $regex: 'New York', $options: 'i' } })
     );
   });
 

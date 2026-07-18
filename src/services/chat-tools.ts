@@ -24,8 +24,8 @@ export const searchPropertiesTool = {
       properties: {
         query: { type: 'string', description: 'Search query for title or location keywords' },
         location: { type: 'string', description: 'Exact location filter (e.g. "Brooklyn, NY", "Manhattan")' },
-        minPrice: { type: 'number', description: 'Minimum price in dollars as a number (e.g. 1000)' },
-        maxPrice: { type: 'number', description: 'Maximum price in dollars as a number (e.g. 3000)' },
+        minPrice: { type: 'string', description: 'Minimum price in dollars (e.g. "1000" or 1000)' },
+        maxPrice: { type: 'string', description: 'Maximum price in dollars (e.g. "3000" or 3000)' },
         propertyType: { type: 'string', description: 'Type of property: apartment, house, room, studio, villa, condo, townhouse' },
       },
     },

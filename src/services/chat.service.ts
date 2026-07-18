@@ -1,83 +1,57 @@
 import { ChatMessage } from '../types';
-import { tools, executeToolCall } from './chat-tools';
+import { executeToolCall } from './chat-tools';
 
-const SYSTEM_PROMPT = `You are a helpful real estate assistant for Rentivo, a property rental platform in New York City. You help users find rental properties, answer questions about listings, and provide information about saved properties.
+const SYSTEM_PROMPT = `You are a helpful real estate assistant for Rentivo, a property rental platform in New York City.
 
-You have access to three tools:
-1. searchProperties - Search for properties by criteria (location, price, type). ONLY call this when the user explicitly wants to find, see, or browse properties.
-2. getPropertyDetails - Get detailed info about a specific property by its ID. ONLY call this when the user asks about a specific property they've already seen.
-3. getUserSavedProperties - Get the user's saved/favorited properties. ONLY call this when the user asks about their saved or favorited listings.
+AVAILABLE TOOLS — call them by writing a <tool_call> block (exactly this format, on its own lines):
 
-Rules:
-- NEVER fabricate property listings, prices, or availability — always use tools for real data
-- Use tools ONLY when the user's request requires fetching data from the database
-- For general questions about renting, neighborhoods, or real estate advice — answer directly from your knowledge WITHOUT calling any tool
-- When showing search results, format as a numbered list with title, location, price, and type
-- Format prices with dollar signs and commas (e.g. $2,500/mo)
-- Use a friendly, professional tone
-- Handle short follow-up messages (like "Near subway?", "Best areas", "What about price?") by understanding them in context of the previous conversation — do NOT ask the user to clarify what they mean
-- Always respond in the same language the user writes in`;
+<tool_call>
+{"tool": "searchProperties", "args": {"query": "...", "location": "...", "minPrice": 1000, "maxPrice": 3000, "propertyType": "apartment"}}
+</tool_call>
+
+Tools:
+1. searchProperties — Search properties. Args (all optional): query, location, minPrice (number), maxPrice (number), propertyType (apartment|house|room|studio|villa)
+2. getPropertyDetails — Get details + reviews for a property. Args: {propertyId: "<id>"}  
+3. getUserSavedProperties — Get user's saved properties. Args: {}
+
+RULES:
+- When the user asks to see, find, or search for properties, ALWAYS call searchProperties. Only include filter arguments the user actually specified — do NOT add default location, price, or type filters unless the user asked for them. An empty args object returns all properties.
+- When the user asks about a specific property they've seen, call getPropertyDetails with the property's ID from previous results.
+- NEVER invent, fabricate, or make up property listings, names, prices, or availability. ONLY show properties from tool results.
+- If tool results are empty, say "No properties match those criteria" and suggest broadening the search.
+- Format results as a numbered list: Title, Location, $Price/mo, Type
+- For general real estate questions, answer directly without calling any tool.
+- Handle short follow-ups ("Near subway?", "Best areas?") by understanding them in context.
+- Always respond in the same language the user writes in.`;
+
+const TOOL_CALL_REGEX = /<tool_call>\s*([\s\S]*?)\s*<\/tool_call>/g;
 
 const createClient = async () => {
   const Groq = (await import('groq-sdk')).default;
   return new Groq({ apiKey: process.env.GROQ_API_KEY });
 };
 
-const streamChat = async function* (
+const streamToString = async function* (
   client: Awaited<ReturnType<typeof createClient>>,
-  msgs: { role: 'system' | 'user' | 'assistant' | 'tool'; content: string | null; tool_calls?: unknown[]; tool_call_id?: string }[]
+  msgs: { role: string; content: string }[]
 ): AsyncGenerator<string> {
   const stream = await client.chat.completions.create({
     model: 'llama-3.3-70b-versatile',
     messages: msgs,
-    tools,
     stream: true,
   });
 
   let fullContent = '';
-  const toolCalls = new Map<number, { id: string; name: string; arguments: string }>();
 
-  try {
-    for await (const chunk of stream) {
-      const delta = chunk.choices[0]?.delta;
-
-      if (delta?.tool_calls) {
-        for (const tc of delta.tool_calls) {
-          const index = tc.index ?? 0;
-          const existing = toolCalls.get(index);
-
-          if (existing) {
-            existing.arguments += tc.function?.arguments || '';
-          } else {
-            toolCalls.set(index, {
-              id: tc.id || '',
-              name: tc.function?.name || '',
-              arguments: tc.function?.arguments || '',
-            });
-          }
-        }
-      }
-
-      if (delta?.content) {
-        fullContent += delta.content;
-        yield JSON.stringify({ type: 'token', content: delta.content });
-      }
+  for await (const chunk of stream) {
+    const delta = chunk.choices[0]?.delta;
+    if (delta?.content) {
+      fullContent += delta.content;
+      yield JSON.stringify({ type: 'token', content: delta.content });
     }
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Unknown stream error';
-
-    if (msg.includes('tool call validation failed') || msg.includes('did not match schema')) {
-      yield JSON.stringify({
-        type: 'error',
-        message: 'I had trouble forming that search. Let me try a simpler query.',
-      });
-      return;
-    }
-
-    throw error;
   }
 
-  return { fullContent, toolCalls };
+  return fullContent;
 };
 
 export const sendMessage = async function* (
@@ -87,79 +61,70 @@ export const sendMessage = async function* (
 ): AsyncGenerator<string> {
   const client = await createClient();
 
-  const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
+  const messages: { role: string; content: string }[] = [
     { role: 'system', content: SYSTEM_PROMPT },
-    ...history,
+    ...history.map((h) => ({ role: h.role, content: h.content })),
     { role: 'user', content: message },
   ];
 
   let fullContent = '';
-  const toolCalls = new Map<string, { id: string; name: string; arguments: string }>();
 
   try {
-    const result = yield* streamChat(client, messages);
-    if (!result) {
-      yield JSON.stringify({ type: 'done' });
-      return;
-    }
-
-    fullContent = result.fullContent;
-    for (const [index, tc] of result.toolCalls) {
-      toolCalls.set(tc.id || String(index), tc);
-    }
+    const result = yield* streamToString(client, messages);
+    fullContent = result || '';
   } catch {
     yield JSON.stringify({ type: 'done' });
     return;
   }
 
+  const toolCalls = new Map<string, { name: string; args: Record<string, unknown> }>();
+  let match: RegExpExecArray | null;
+
+  while ((match = TOOL_CALL_REGEX.exec(fullContent)) !== null) {
+    try {
+      const parsed = JSON.parse(match[1]);
+      if (parsed.tool && parsed.args) {
+        const id = `tc-${toolCalls.size}`;
+        toolCalls.set(id, { name: parsed.tool, args: parsed.args });
+      }
+    } catch {
+      // skip malformed
+    }
+  }
+
   if (toolCalls.size > 0) {
-    const toolResults = new Map<string, string>();
+    const toolResults: string[] = [];
 
     for (const [, tc] of toolCalls) {
-      yield JSON.stringify({ type: 'tool_call', tool: tc.name, args: tc.arguments });
+      yield JSON.stringify({ type: 'tool_call', tool: tc.name, args: JSON.stringify(tc.args) });
 
       try {
-        const args = JSON.parse(tc.arguments);
-        const toolResult = await executeToolCall(tc.name, args, userId);
-        const resultContent = JSON.stringify(toolResult);
-        toolResults.set(tc.id, resultContent);
-        yield JSON.stringify({ type: 'tool_result', result: toolResult });
+        const result = await executeToolCall(tc.name, tc.args, userId);
+        toolResults.push(JSON.stringify(result));
+        yield JSON.stringify({ type: 'tool_result', result });
       } catch (error) {
-        const errorContent = JSON.stringify({ error: `Failed to execute ${tc.name}: ${error instanceof Error ? error.message : 'unknown error'}` });
-        toolResults.set(tc.id, errorContent);
-        yield JSON.stringify({
-          type: 'tool_result',
-          result: { error: `Failed to execute ${tc.name}` },
-        });
+        const errorStr = JSON.stringify({ error: `Failed to execute ${tc.name}: ${error instanceof Error ? error.message : 'unknown error'}` });
+        toolResults.push(errorStr);
+        yield JSON.stringify({ type: 'tool_result', result: { error: `Failed to execute ${tc.name}` } });
       }
     }
 
-    const toolMessages: { role: string; content: string | null; tool_calls?: unknown[]; tool_call_id?: string }[] = [
-      ...messages,
-      ...Array.from(toolCalls.values()).map((tc) => ({
-        role: 'assistant',
-        content: null,
-        tool_calls: [{ id: tc.id, type: 'function', function: { name: tc.name, arguments: tc.arguments } }],
-      })),
-      ...Array.from(toolCalls.values()).map((tc) => ({
-        role: 'tool',
-        tool_call_id: tc.id,
-        content: toolResults.get(tc.id) || 'No result',
-      })),
+    const followUpMessages = [
+      { role: 'system', content: 'You received property data from tools. Format and present ONLY the properties from these results as a numbered list. Do NOT invent any additional properties. If results are empty, say "No properties match those criteria." Format: Title, Location, $Price/mo, Type.' },
+      ...messages.filter((m) => m.role !== 'system'),
+      { role: 'user', content: `Tool results:\n${toolResults.join('\n')}\n\nPresent these results to the user now.` },
     ];
 
-    let followUpContent = '';
     try {
       const followUp = await client.chat.completions.create({
         model: 'llama-3.3-70b-versatile',
-        messages: toolMessages,
+        messages: followUpMessages,
         stream: true,
       });
 
       for await (const chunk of followUp) {
         const delta = chunk.choices[0]?.delta;
-        if (delta?.content) {
-          followUpContent += delta.content;
+        if (delta?.content && !delta.content.includes('<tool_call>')) {
           yield JSON.stringify({ type: 'token', content: delta.content });
         }
       }
@@ -169,8 +134,6 @@ export const sendMessage = async function* (
         content: '\n\nI found some results but had trouble summarizing them. Please try asking again.',
       });
     }
-  } else {
-    // no tool calls — fullContent already streamed
   }
 
   yield JSON.stringify({ type: 'done' });

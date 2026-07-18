@@ -136,7 +136,7 @@ describe('E2E: Property Search and Filter Flow (Req 11, 12, 13)', () => {
 
     expect(filteredRes.status).toBe(200);
     expect(mockCollections.properties.find).toHaveBeenCalledWith(
-      expect.objectContaining({ location: 'New York' })
+      expect.objectContaining({ location: { $regex: 'New York', $options: 'i' } })
     );
 
     // Step 3: Sort by price ascending
