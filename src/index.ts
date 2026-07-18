@@ -19,11 +19,31 @@ app.use(cors({
 }));
 app.use(express.json());
 
+const isDevelopment = process.env.NODE_ENV !== 'production';
+
 app.use((req, res, next) => {
   const start = Date.now();
+  
+  // Log request details in development
+  if (isDevelopment) {
+    console.log(`\n→ ${req.method} ${req.originalUrl}`);
+    if (Object.keys(req.query).length > 0) {
+      console.log('  Query:', req.query);
+    }
+    if (req.headers.authorization) {
+      console.log('  Auth:', req.headers.authorization.substring(0, 20) + '...');
+    }
+  }
+  
   res.on('finish', () => {
     const ms = Date.now() - start;
-    console.log(`${req.method} ${req.originalUrl} ${res.statusCode} in ${ms}ms`);
+    const statusColor = res.statusCode >= 400 ? '🔴' : '✅';
+    
+    if (isDevelopment) {
+      console.log(`${statusColor} ${req.method} ${req.originalUrl} ${res.statusCode} in ${ms}ms`);
+    } else {
+      console.log(`${req.method} ${req.originalUrl} ${res.statusCode} in ${ms}ms`);
+    }
   });
   next();
 });

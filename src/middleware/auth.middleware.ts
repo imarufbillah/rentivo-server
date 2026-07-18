@@ -28,6 +28,9 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('🔒 Auth failed: No Bearer token in Authorization header');
+      }
       return res.status(401).json({
         success: false,
         error: { code: 'UNAUTHORIZED', message: 'No token provided' },
@@ -46,8 +49,17 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
       name: payload.name as string | undefined,
     };
 
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('✓ Auth success:', req.user.email, `(${req.user.role})`);
+    }
+
     next();
-  } catch {
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('🔒 Auth failed: Token verification error');
+      console.error('  Error:', error instanceof Error ? error.message : 'Unknown error');
+    }
+
     try {
       const authHeader = req.headers.authorization;
       if (authHeader?.startsWith('Bearer ')) {

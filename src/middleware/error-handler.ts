@@ -12,50 +12,77 @@ export class AppError extends Error {
   }
 }
 
-const ERROR_CODES = {
-  UNAUTHORIZED: 401,
-  SESSION_EXPIRED: 401,
-  VALIDATION_FAILED: 400,
-  RESOURCE_NOT_FOUND: 404,
-  INSUFFICIENT_ROLE: 403,
-  ALREADY_OWNER: 409,
-  DUPLICATE_REVIEW: 409,
-  REVIEW_NOT_ALLOWED: 403,
-  INTERNAL_ERROR: 500,
-  LLM_SERVICE_UNAVAILABLE: 503,
-} as const;
+const isDevelopment = process.env.NODE_ENV !== 'production';
 
-export const errorHandler = (err: Error, _req: Request, res: Response, _next: NextFunction) => {
+export const errorHandler = (err: Error, req: Request, res: Response, _next: NextFunction) => {
+  // Log detailed error in development
+  if (isDevelopment) {
+    console.error('\n❌ Error occurred:');
+    console.error('Route:', req.method, req.originalUrl);
+    console.error('Type:', err.name);
+    console.error('Message:', err.message);
+    if (err.stack) {
+      console.error('Stack:', err.stack);
+    }
+    if (err instanceof ZodError) {
+      console.error('Validation Issues:', JSON.stringify(err.issues, null, 2));
+    }
+    console.error('---\n');
+  }
+
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
       success: false,
-      error: { code: err.code, message: err.message },
+      error: { 
+        code: err.code, 
+        message: err.message,
+        ...(isDevelopment && { stack: err.stack })
+      },
     });
   }
 
   if (err instanceof ZodError) {
     return res.status(400).json({
       success: false,
-      error: { code: 'VALIDATION_FAILED', message: err.issues[0].message },
+      error: { 
+        code: 'VALIDATION_FAILED', 
+        message: err.issues[0].message,
+        ...(isDevelopment && { issues: err.issues })
+      },
     });
   }
 
   if (err.name === 'MongoServerError') {
     return res.status(500).json({
       success: false,
-      error: { code: 'DATABASE_ERROR', message: 'Database operation failed' },
+      error: { 
+        code: 'DATABASE_ERROR', 
+        message: 'Database operation failed',
+        ...(isDevelopment && { details: err.message })
+      },
     });
   }
 
   if (err.name === 'MongoNetworkError') {
     return res.status(503).json({
       success: false,
-      error: { code: 'SERVICE_UNAVAILABLE', message: 'Database connection failed' },
+      error: { 
+        code: 'SERVICE_UNAVAILABLE', 
+        message: 'Database connection failed',
+        ...(isDevelopment && { details: err.message })
+      },
     });
   }
 
+  // Log unexpected errors even in production
+  console.error('Unexpected error:', err);
+
   return res.status(500).json({
     success: false,
-    error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' },
+    error: { 
+      code: 'INTERNAL_ERROR', 
+      message: 'An unexpected error occurred',
+      ...(isDevelopment && { details: err.message, stack: err.stack })
+    },
   });
 };
