@@ -1,8 +1,13 @@
-import { MongoClient, MongoClientOptions } from 'mongodb';
+import { MongoClient, MongoClientOptions, ServerApiVersion } from 'mongodb';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/rentivo';
 
 const options: MongoClientOptions = {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
   maxPoolSize: 50,
   minPoolSize: 5,
   maxIdleTimeMS: 60000,

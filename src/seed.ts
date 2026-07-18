@@ -1,4 +1,4 @@
-import { MongoClient, ObjectId } from 'mongodb';
+import { MongoClient, ObjectId, ServerApiVersion } from 'mongodb';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 
@@ -134,7 +134,13 @@ const reviewComments = [
 ];
 
 const seed = async () => {
-  const client = new MongoClient(MONGODB_URI);
+  const client = new MongoClient(MONGODB_URI, {
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+    },
+  });
 
   try {
     await client.connect();
