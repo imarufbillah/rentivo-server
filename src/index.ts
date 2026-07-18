@@ -6,6 +6,7 @@ import propertyRoutes from './routes/property.routes';
 import interactionRoutes from './routes/interaction.routes';
 import reviewRoutes from './routes/review.routes';
 import recommendationRoutes from './routes/recommendation.routes';
+import chatRoutes from './routes/chat.routes';
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use('/api/properties', propertyRoutes);
 app.use('/api/interactions', interactionRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/recommendations', recommendationRoutes);
+app.use('/api/chat', chatRoutes);
 
 const startServer = async () => {
   try {
