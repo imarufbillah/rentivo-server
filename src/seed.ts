@@ -149,18 +149,18 @@ const seed = async () => {
     const db = client.db('rentivo');
 
     // Clear existing data
-    await db.collection('users').deleteMany({});
+    await db.collection('user').deleteMany({});
     await db.collection('properties').deleteMany({});
     await db.collection('interactions').deleteMany({});
     await db.collection('reviews').deleteMany({});
-    await db.collection('sessions').deleteMany({});
+    await db.collection('session').deleteMany({});
     console.log('Cleared existing data');
 
     // Create demo users
     const ownerPassword = await bcrypt.hash('owner1234', SALT_ROUNDS);
     const renterPassword = await bcrypt.hash('demo1234', SALT_ROUNDS);
 
-    const ownerResult = await db.collection('users').insertOne({
+    const ownerResult = await db.collection('user').insertOne({
       email: 'owner@demo.com',
       password: ownerPassword,
       role: 'owner',
@@ -170,7 +170,7 @@ const seed = async () => {
       updatedAt: new Date(),
     });
 
-    const renterResult = await db.collection('users').insertOne({
+    const renterResult = await db.collection('user').insertOne({
       email: 'renter@demo.com',
       password: renterPassword,
       role: 'renter',
@@ -238,7 +238,7 @@ const seed = async () => {
     console.log(`Created ${interactions.length} interactions for demo renter`);
 
     // Create reviews (from a third user for variety)
-    const reviewerResult = await db.collection('users').insertOne({
+    const reviewerResult = await db.collection('user').insertOne({
       email: 'reviewer@demo.com',
       password: await bcrypt.hash('review1234', SALT_ROUNDS),
       role: 'renter',

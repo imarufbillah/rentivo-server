@@ -27,7 +27,7 @@ export const getCollections = async (): Promise<Collections> => {
   const db = await getDatabase();
   
   return {
-    users: db.collection<User>('users'),
+    users: db.collection<User>('user'),
     properties: db.collection<Property>('properties'),
     interactions: db.collection<Interaction>('interactions'),
     reviews: db.collection<Review>('reviews'),
