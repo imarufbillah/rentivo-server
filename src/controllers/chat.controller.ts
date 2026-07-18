@@ -28,6 +28,17 @@ export const sendMessage = async (req: Request, res: Response) => {
 
     res.end();
   } catch (error) {
+    // Log error details in development
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('\n❌ Chat error caught:');
+      console.error('User:', req.user?.email);
+      console.error('Error:', error instanceof Error ? error.message : 'Unknown error');
+      if (error instanceof Error && error.stack) {
+        console.error('Stack:', error.stack);
+      }
+      console.error('---\n');
+    }
+
     const isLLMError = error instanceof Error && (
       error.message.includes('groq') ||
       error.message.includes('ECONNREFUSED') ||
@@ -64,7 +75,18 @@ export const getSuggestions = async (req: Request, res: Response) => {
 
     const suggestions = await chatService.generateFollowUpSuggestions(parsed.data.conversationHistory);
     res.json({ success: true, data: { suggestions } });
-  } catch {
+  } catch (error) {
+    // Log error details in development
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('\n❌ Chat suggestions error:');
+      console.error('User:', req.user?.email);
+      console.error('Error:', error instanceof Error ? error.message : 'Unknown error');
+      if (error instanceof Error && error.stack) {
+        console.error('Stack:', error.stack);
+      }
+      console.error('---\n');
+    }
+
     res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Failed to generate suggestions' },
