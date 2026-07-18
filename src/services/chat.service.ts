@@ -15,25 +15,8 @@ Rules:
 - When showing search results, format as a numbered list with title, location, price, and type
 - Format prices with dollar signs and commas (e.g. $2,500/mo)
 - Use a friendly, professional tone
-- If the user's request is ambiguous, ask a clarifying question
+- Handle short follow-up messages (like "Near subway?", "Best areas", "What about price?") by understanding them in context of the previous conversation — do NOT ask the user to clarify what they mean
 - Always respond in the same language the user writes in`;
-
-const MAX_HISTORY = 20;
-
-const conversationStore = new Map<string, ChatMessage[]>();
-
-const getConversationHistory = (sessionId: string): ChatMessage[] => {
-  return conversationStore.get(sessionId) || [];
-};
-
-const addToConversationHistory = (sessionId: string, message: ChatMessage) => {
-  const history = getConversationHistory(sessionId);
-  history.push(message);
-  if (history.length > MAX_HISTORY) {
-    history.shift();
-  }
-  conversationStore.set(sessionId, history);
-};
 
 const createClient = async () => {
   const Groq = (await import('groq-sdk')).default;
@@ -102,18 +85,13 @@ export const sendMessage = async function* (
   message: string,
   history: ChatMessage[]
 ): AsyncGenerator<string> {
-  const sessionId = userId;
-  const conversationHistory = getConversationHistory(sessionId);
   const client = await createClient();
 
   const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
     { role: 'system', content: SYSTEM_PROMPT },
-    ...conversationHistory,
     ...history,
     { role: 'user', content: message },
   ];
-
-  addToConversationHistory(sessionId, { role: 'user', content: message });
 
   let fullContent = '';
   const toolCalls = new Map<string, { id: string; name: string; arguments: string }>();
@@ -146,11 +124,6 @@ export const sendMessage = async function* (
         const resultContent = JSON.stringify(toolResult);
         toolResults.set(tc.id, resultContent);
         yield JSON.stringify({ type: 'tool_result', result: toolResult });
-
-        addToConversationHistory(sessionId, {
-          role: 'assistant',
-          content: `Called ${tc.name} and got results`,
-        });
       } catch (error) {
         const errorContent = JSON.stringify({ error: `Failed to execute ${tc.name}: ${error instanceof Error ? error.message : 'unknown error'}` });
         toolResults.set(tc.id, errorContent);
@@ -196,10 +169,8 @@ export const sendMessage = async function* (
         content: '\n\nI found some results but had trouble summarizing them. Please try asking again.',
       });
     }
-
-    addToConversationHistory(sessionId, { role: 'assistant', content: followUpContent || 'I found some results for you.' });
   } else {
-    addToConversationHistory(sessionId, { role: 'assistant', content: fullContent });
+    // no tool calls — fullContent already streamed
   }
 
   yield JSON.stringify({ type: 'done' });
@@ -229,6 +200,6 @@ Return ONLY a JSON object: {"suggestions": ["question 1", "question 2", "questio
   }
 };
 
-export const clearConversationHistory = (sessionId: string) => {
-  conversationStore.delete(sessionId);
+export const clearConversationHistory = (_sessionId: string) => {
+  // No-op: conversation context is managed by the client
 };
