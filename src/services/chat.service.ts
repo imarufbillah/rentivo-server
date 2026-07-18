@@ -91,19 +91,25 @@ export const sendMessage = async function* (
   }
 
   if (toolCalls.size > 0) {
+    const toolResults = new Map<string, string>();
+
     for (const [, tc] of toolCalls) {
       yield JSON.stringify({ type: 'tool_call', tool: tc.name, args: tc.arguments });
 
       try {
         const args = JSON.parse(tc.arguments);
         const result = await executeToolCall(tc.name, args, userId);
+        const resultContent = JSON.stringify(result);
+        toolResults.set(tc.id, resultContent);
         yield JSON.stringify({ type: 'tool_result', result });
 
         addToConversationHistory(sessionId, {
           role: 'assistant',
           content: `Called ${tc.name} and got results`,
         });
-      } catch {
+      } catch (error) {
+        const errorContent = JSON.stringify({ error: `Failed to execute ${tc.name}: ${error instanceof Error ? error.message : 'unknown error'}` });
+        toolResults.set(tc.id, errorContent);
         yield JSON.stringify({
           type: 'tool_result',
           result: { error: `Failed to execute ${tc.name}` },
@@ -121,7 +127,7 @@ export const sendMessage = async function* (
       ...Array.from(toolCalls.values()).map((tc) => ({
         role: 'tool',
         tool_call_id: tc.id,
-        content: 'Tool executed successfully',
+        content: toolResults.get(tc.id) || 'No result',
       })),
     ];
 

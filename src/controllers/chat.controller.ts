@@ -27,11 +27,28 @@ export const sendMessage = async (req: Request, res: Response) => {
     }
 
     res.end();
-  } catch {
-    res.status(500).json({
-      success: false,
-      error: { code: 'INTERNAL_ERROR', message: 'Failed to process chat message' },
-    });
+  } catch (error) {
+    const isLLMError = error instanceof Error && (
+      error.message.includes('groq') ||
+      error.message.includes('ECONNREFUSED') ||
+      error.message.includes('ENOTFOUND') ||
+      error.message.includes('503') ||
+      error.message.includes('502') ||
+      error.message.includes('rate_limit') ||
+      error.message.includes('overloaded')
+    );
+
+    if (isLLMError) {
+      res.status(503).json({
+        success: false,
+        error: { code: 'LLM_SERVICE_UNAVAILABLE', message: 'The AI assistant is temporarily unavailable. Please try again later.' },
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to process chat message' },
+      });
+    }
   }
 };
 

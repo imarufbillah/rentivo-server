@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { jwtVerify } from 'jose';
+import { jwtVerify, decodeJwt } from 'jose';
+import { clearConversationHistory } from '../services/chat.service';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -47,9 +48,22 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
 
     next();
   } catch {
+    try {
+      const authHeader = req.headers.authorization;
+      if (authHeader?.startsWith('Bearer ')) {
+        const token = authHeader.split(' ')[1];
+        const payload = decodeJwt(token);
+        if (payload.sub) {
+          clearConversationHistory(payload.sub);
+        }
+      }
+    } catch {
+      // best-effort cleanup
+    }
+
     return res.status(401).json({
       success: false,
-      error: { code: 'UNAUTHORIZED', message: 'Invalid or expired token' },
+      error: { code: 'SESSION_EXPIRED', message: 'Invalid or expired token' },
     });
   }
 };

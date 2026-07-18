@@ -80,15 +80,21 @@ describe('deleteProperty', () => {
     );
   });
 
-  it('cascades delete to interactions and reviews', async () => {
+  it('cascades delete to interactions and reviews with correct propertyId', async () => {
     const existing = { _id: propertyId, ownerId: { toString: () => ownerId } };
     mockCollections.properties.findOne.mockResolvedValue(existing);
 
     await deleteProperty(propertyId, ownerId);
 
-    expect(mockCollections.interactions.deleteMany).toHaveBeenCalledOnce();
-    expect(mockCollections.reviews.deleteMany).toHaveBeenCalledOnce();
-    expect(mockCollections.properties.deleteOne).toHaveBeenCalledOnce();
+    expect(mockCollections.interactions.deleteMany).toHaveBeenCalledWith(
+      expect.objectContaining({ propertyId: expect.anything() })
+    );
+    expect(mockCollections.reviews.deleteMany).toHaveBeenCalledWith(
+      expect.objectContaining({ propertyId: expect.anything() })
+    );
+    expect(mockCollections.properties.deleteOne).toHaveBeenCalledWith(
+      expect.objectContaining({ _id: expect.anything() })
+    );
   });
 });
 
