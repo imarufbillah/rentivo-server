@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import clientPromise from './lib/db/mongodb';
+import { errorHandler } from './middleware/error-handler';
 import propertyRoutes from './routes/property.routes';
 import interactionRoutes from './routes/interaction.routes';
 import reviewRoutes from './routes/review.routes';
@@ -34,6 +35,8 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/users', userRoutes);
+
+app.use(errorHandler);
 
 const startServer = async () => {
   try {
