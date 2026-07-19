@@ -6,6 +6,7 @@ const createMockCollection = () => ({
   aggregate: vi.fn().mockReturnThis(),
   insertOne: vi.fn().mockResolvedValue({ insertedId: { toString: () => '507f1f77bcf86cd799439011' } }),
   findOneAndUpdate: vi.fn().mockResolvedValue(null),
+  updateOne: vi.fn().mockResolvedValue({ matchedCount: 1, modifiedCount: 1 }),
   deleteOne: vi.fn().mockResolvedValue({ deletedCount: 1 }),
   deleteMany: vi.fn().mockResolvedValue({ deletedCount: 0 }),
   countDocuments: vi.fn().mockResolvedValue(0),
@@ -45,6 +46,7 @@ export const resetMocks = () => {
     col.insertOne.mockResolvedValue({
       insertedId: { toString: () => '507f1f77bcf86cd799439011', equals: (id: any) => id?.toString?.() === '507f1f77bcf86cd799439011' },
     });
+    col.updateOne.mockResolvedValue({ matchedCount: 1, modifiedCount: 1 });
     col.deleteOne.mockResolvedValue({ deletedCount: 1 });
     col.deleteMany.mockResolvedValue({ deletedCount: 0 });
     col.createIndex.mockResolvedValue('');

@@ -16,7 +16,7 @@ beforeEach(() => {
 });
 
 describe('trackInteraction', () => {
-  it('creates a view interaction', async () => {
+  it('creates a view interaction when none exists', async () => {
     const result = await trackInteraction(userId, propertyId, 'view');
 
     expect(result.type).toBe('view');
@@ -25,8 +25,44 @@ describe('trackInteraction', () => {
     expect(mockCollections.interactions.insertOne).toHaveBeenCalledOnce();
   });
 
+  it('updates existing view timestamp instead of creating duplicate', async () => {
+    const existingView = {
+      _id: { toString: () => 'existing-view-id' },
+      userId: { toString: () => userId },
+      propertyId: { toString: () => propertyId },
+      type: 'view',
+      createdAt: new Date('2025-01-01'),
+    };
+    mockCollections.interactions.findOne.mockResolvedValue(existingView);
+
+    const result = await trackInteraction(userId, propertyId, 'view');
+
+    expect(mockCollections.interactions.updateOne).toHaveBeenCalledWith(
+      { _id: existingView._id },
+      { $set: { createdAt: expect.any(Date) } }
+    );
+    expect(mockCollections.interactions.insertOne).not.toHaveBeenCalled();
+    expect(result.type).toBe('view');
+  });
+
   it('creates a save interaction', async () => {
     const result = await trackInteraction(userId, propertyId, 'save');
+    expect(result.type).toBe('save');
+  });
+
+  it('returns existing save without creating duplicate', async () => {
+    const existingSave = {
+      _id: { toString: () => 'existing-save-id' },
+      userId: { toString: () => userId },
+      propertyId: { toString: () => propertyId },
+      type: 'save',
+      createdAt: new Date('2025-01-01'),
+    };
+    mockCollections.interactions.findOne.mockResolvedValue(existingSave);
+
+    const result = await trackInteraction(userId, propertyId, 'save');
+
+    expect(mockCollections.interactions.insertOne).not.toHaveBeenCalled();
     expect(result.type).toBe('save');
   });
 
