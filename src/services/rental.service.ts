@@ -230,3 +230,44 @@ export const cancelPendingRental = async (
   });
   return { cancelled: result.deletedCount > 0 };
 };
+
+export const confirmRental = async (
+  stripeSessionId: string
+): Promise<{ confirmed: boolean; rental: Rental | null }> => {
+  const { rentals, properties } = await getCollections();
+
+  const rental = await rentals.findOne({ stripeSessionId });
+  if (!rental) {
+    return { confirmed: false, rental: null };
+  }
+
+  if (rental.status === 'active') {
+    return { confirmed: true, rental };
+  }
+
+  const session = await stripe.checkout.sessions.retrieve(stripeSessionId);
+  if (session.payment_status !== 'paid') {
+    return { confirmed: false, rental };
+  }
+
+  await rentals.updateOne(
+    { _id: rental._id },
+    {
+      $set: {
+        status: 'active',
+        stripePaymentIntentId: session.payment_intent as string,
+        updatedAt: new Date(),
+      },
+    }
+  );
+
+  await properties.updateOne(
+    { _id: rental.propertyId },
+    { $set: { status: 'rented', updatedAt: new Date() } }
+  );
+
+  return {
+    confirmed: true,
+    rental: { ...rental, status: 'active' },
+  };
+};

@@ -53,6 +53,26 @@ export const cancelPending = async (req: Request, res: Response) => {
   }
 };
 
+export const confirm = async (req: Request, res: Response) => {
+  try {
+    const { sessionId } = req.body;
+    if (!sessionId) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_FAILED', message: 'sessionId is required' },
+      });
+    }
+
+    const result = await rentalService.confirmRental(sessionId);
+    res.json({ success: true, data: result });
+  } catch {
+    res.status(500).json({
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'Failed to confirm rental' },
+    });
+  }
+};
+
 export const webhook = async (req: Request, res: Response) => {
   const sig = req.headers['stripe-signature'] as string;
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
