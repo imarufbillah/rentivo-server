@@ -16,6 +16,9 @@ const demoProperties = [
     propertyType: 'studio' as const,
     images: ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800'],
     status: 'active' as const,
+    bedrooms: 0,
+    bathrooms: 1,
+    amenities: ['wifi', 'laundry', 'ac'],
   },
   {
     title: 'Modern 2BR Apartment with Manhattan Views',
@@ -25,6 +28,9 @@ const demoProperties = [
     propertyType: 'apartment' as const,
     images: ['https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800'],
     status: 'active' as const,
+    bedrooms: 2,
+    bathrooms: 2,
+    amenities: ['wifi', 'gym', 'doorman', 'elevator', 'ac'],
   },
   {
     title: 'Cozy Room in Shared Brownstone',
@@ -34,6 +40,9 @@ const demoProperties = [
     propertyType: 'room' as const,
     images: ['https://images.unsplash.com/photo-1598928506311-c55ez637a4c1?w=800'],
     status: 'active' as const,
+    bedrooms: 1,
+    bathrooms: 1,
+    amenities: ['wifi', 'laundry'],
   },
   {
     title: 'Luxury Villa with Private Garden',
@@ -43,6 +52,9 @@ const demoProperties = [
     propertyType: 'villa' as const,
     images: ['https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800'],
     status: 'active' as const,
+    bedrooms: 4,
+    bathrooms: 3,
+    amenities: ['wifi', 'parking', 'pool', 'gym', 'ac', 'balcony', 'fireplace'],
   },
   {
     title: 'Charming House near Central Park',
@@ -52,6 +64,9 @@ const demoProperties = [
     propertyType: 'house' as const,
     images: ['https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800'],
     status: 'active' as const,
+    bedrooms: 3,
+    bathrooms: 2,
+    amenities: ['wifi', 'parking', 'fireplace', 'hardwood', 'balcony'],
   },
   {
     title: 'Affordable Apartment in Astoria',
@@ -61,6 +76,9 @@ const demoProperties = [
     propertyType: 'apartment' as const,
     images: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800'],
     status: 'active' as const,
+    bedrooms: 1,
+    bathrooms: 1,
+    amenities: ['wifi', 'laundry', 'ac'],
   },
   {
     title: 'Penthouse Loft in SoHo',
@@ -70,6 +88,9 @@ const demoProperties = [
     propertyType: 'apartment' as const,
     images: ['https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800'],
     status: 'active' as const,
+    bedrooms: 2,
+    bathrooms: 2,
+    amenities: ['wifi', 'elevator', 'balcony', 'hardwood', 'ac', 'bike'],
   },
   {
     title: 'Quiet Studio near Columbia University',
@@ -79,6 +100,9 @@ const demoProperties = [
     propertyType: 'studio' as const,
     images: ['https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800'],
     status: 'active' as const,
+    bedrooms: 0,
+    bathrooms: 1,
+    amenities: ['wifi', 'laundry'],
   },
   {
     title: 'Spacious 3BR in Park Slope',
@@ -88,6 +112,9 @@ const demoProperties = [
     propertyType: 'apartment' as const,
     images: ['https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800'],
     status: 'active' as const,
+    bedrooms: 3,
+    bathrooms: 2,
+    amenities: ['wifi', 'laundry', 'hardwood', 'dishwasher', 'storage'],
   },
   {
     title: 'Bright Room in Harlem Brownstone',
@@ -97,6 +124,9 @@ const demoProperties = [
     propertyType: 'room' as const,
     images: ['https://images.unsplash.com/photo-1595514535415-dae8580c416c?w=800'],
     status: 'active' as const,
+    bedrooms: 1,
+    bathrooms: 1,
+    amenities: ['wifi', 'balcony'],
   },
   {
     title: 'Waterfront Condo in Long Island City',
@@ -106,6 +136,9 @@ const demoProperties = [
     propertyType: 'apartment' as const,
     images: ['https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=800'],
     status: 'active' as const,
+    bedrooms: 2,
+    bathrooms: 2,
+    amenities: ['wifi', 'parking', 'pool', 'gym', 'laundry', 'doorman', 'elevator'],
   },
   {
     title: 'Renovated House in Staten Island',
@@ -115,6 +148,9 @@ const demoProperties = [
     propertyType: 'house' as const,
     images: ['https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800'],
     status: 'active' as const,
+    bedrooms: 4,
+    bathrooms: 3,
+    amenities: ['wifi', 'parking', 'ac', 'balcony', 'fireplace', 'storage'],
   },
 ];
 
