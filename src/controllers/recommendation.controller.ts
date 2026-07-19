@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import * as recommendationService from '../services/recommendation.service';
-import { PropertyType } from '../types';
-import { logControllerError } from '../lib/logger';
+import * as recommendationService from '../services/recommendation.service.js';
+import { PropertyType } from '../types/index.js';
+import { logControllerError } from '../lib/logger.js';
 
 export const getRecommendations = async (req: Request, res: Response) => {
   try {

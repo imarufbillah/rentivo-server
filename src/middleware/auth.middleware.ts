@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { jwtVerify, createRemoteJWKSet, decodeJwt } from 'jose';
-import { clearConversationHistory } from '../services/chat.service';
+import { clearConversationHistory } from '../services/chat.service.js';
 
 const AUTH_BASE_URL = process.env.AUTH_BASE_URL || 'http://localhost:3000';
 const JWKS_URL = `${AUTH_BASE_URL}/api/auth/jwks`;

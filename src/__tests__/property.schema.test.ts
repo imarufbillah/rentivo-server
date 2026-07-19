@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createPropertySchema, updatePropertySchema, propertyFilterSchema } from '../lib/validation/property.schemas';
+import { createPropertySchema, updatePropertySchema, propertyFilterSchema } from '../lib/validation/property.schemas.js';
 
 const validProperty = {
   title: 'Cozy Apartment Downtown',

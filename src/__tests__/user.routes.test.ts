@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { mockCollections, resetMocks } from './helpers';
-import userRoutes from '../routes/user.routes';
+import { mockCollections, resetMocks } from './helpers.js';
+import userRoutes from '../routes/user.routes.js';
 import express from 'express';
 
 const createApp = () => {

@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
-import { getCollections } from '../lib/db/collections';
-import { Interaction, Property, InteractionType, PropertyWithStats } from '../types';
+import { getCollections } from '../lib/db/collections.js';
+import { Interaction, Property, InteractionType, PropertyWithStats } from '../types/index.js';
 
 const MAX_INTERACTION_HISTORY = 100;
 

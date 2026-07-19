@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import * as chatService from '../services/chat.service';
-import { chatMessageSchema, chatSuggestionsSchema } from '../lib/validation/chat.schemas';
-import { logValidationError, logControllerError } from '../lib/logger';
+import * as chatService from '../services/chat.service.js';
+import { chatMessageSchema, chatSuggestionsSchema } from '../lib/validation/chat.schemas.js';
+import { logValidationError, logControllerError } from '../lib/logger.js';
 
 export const sendMessage = async (req: Request, res: Response) => {
   try {

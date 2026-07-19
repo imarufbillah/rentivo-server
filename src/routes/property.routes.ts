@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { authenticate, requireOwner } from '../middleware/auth.middleware';
-import * as propertyController from '../controllers/property.controller';
+import { authenticate, requireOwner } from '../middleware/auth.middleware.js';
+import * as propertyController from '../controllers/property.controller.js';
 
 const router = Router();
 

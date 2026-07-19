@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import * as interactionService from '../services/interaction.service';
-import { createInteractionSchema, getInteractionHistorySchema, deleteInteractionSchema, propertyIdParamSchema } from '../lib/validation/interaction.schemas';
-import { logValidationError, logControllerError } from '../lib/logger';
+import * as interactionService from '../services/interaction.service.js';
+import { createInteractionSchema, getInteractionHistorySchema, deleteInteractionSchema, propertyIdParamSchema } from '../lib/validation/interaction.schemas.js';
+import { logValidationError, logControllerError } from '../lib/logger.js';
 
 export const trackInteraction = async (req: Request, res: Response) => {
   try {

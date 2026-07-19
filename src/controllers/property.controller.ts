@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import * as propertyService from '../services/property.service';
-import * as interactionService from '../services/interaction.service';
-import * as reviewService from '../services/review.service';
-import { getCollections } from '../lib/db/collections';
-import { createPropertySchema, updatePropertySchema, propertyFilterSchema } from '../lib/validation/property.schemas';
-import { PropertyWithStats } from '../types';
-import { logValidationError, logControllerError } from '../lib/logger';
+import * as propertyService from '../services/property.service.js';
+import * as interactionService from '../services/interaction.service.js';
+import * as reviewService from '../services/review.service.js';
+import { getCollections } from '../lib/db/collections.js';
+import { createPropertySchema, updatePropertySchema, propertyFilterSchema } from '../lib/validation/property.schemas.js';
+import { PropertyWithStats } from '../types/index.js';
+import { logValidationError, logControllerError } from '../lib/logger.js';
 
 export const createProperty = async (req: Request, res: Response) => {
   try {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createInteractionSchema } from '../lib/validation/interaction.schemas';
+import { createInteractionSchema } from '../lib/validation/interaction.schemas.js';
 
 const validInteraction = {
   propertyId: '507f1f77bcf86cd799439011',

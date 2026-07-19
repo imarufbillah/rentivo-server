@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { mockCollections, resetMocks } from './helpers';
+import { mockCollections, resetMocks } from './helpers.js';
 import {
   trackInteraction,
   getUserInteractions,
   getUserSavedProperties,
   deleteInteractionsByProperty,
   capInteractionHistory,
-} from '../services/interaction.service';
+} from '../services/interaction.service.js';
 
 const userId = '507f1f77bcf86cd799439011';
 const propertyId = '507f1f77bcf86cd799439012';

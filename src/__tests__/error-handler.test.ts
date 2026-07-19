@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { AppError, errorHandler } from '../middleware/error-handler';
+import { AppError, errorHandler } from '../middleware/error-handler.js';
 import { ZodError } from 'zod';
 import { Request, Response, NextFunction } from 'express';
 

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { mockCollections, resetMocks } from './helpers';
-import interactionRoutes from '../routes/interaction.routes';
+import { mockCollections, resetMocks } from './helpers.js';
+import interactionRoutes from '../routes/interaction.routes.js';
 import express from 'express';
 
 const createApp = () => {

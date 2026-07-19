@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { mockCollections, resetMocks } from './helpers';
+import { mockCollections, resetMocks } from './helpers.js';
 
 vi.mock('../lib/db/collections', () => ({
   getCollections: vi.fn().mockResolvedValue(mockCollections),
@@ -15,9 +15,9 @@ vi.mock('../services/chat.service', () => ({
 }));
 
 import express from 'express';
-import propertyRoutes from '../routes/property.routes';
-import interactionRoutes from '../routes/interaction.routes';
-import reviewRoutes from '../routes/review.routes';
+import propertyRoutes from '../routes/property.routes.js';
+import interactionRoutes from '../routes/interaction.routes.js';
+import reviewRoutes from '../routes/review.routes.js';
 
 const ownerId = '507f1f77bcf86cd799439011';
 const renterId = '507f1f77bcf86cd799439012';

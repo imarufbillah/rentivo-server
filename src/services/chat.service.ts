@@ -1,5 +1,5 @@
-import { ChatMessage } from '../types';
-import { executeToolCall } from './chat-tools';
+import { ChatMessage } from '../types/index.js';
+import { executeToolCall } from './chat-tools.js';
 
 const SYSTEM_PROMPT = `You are a helpful real estate assistant for Rentivo, a property rental platform in New York City.
 

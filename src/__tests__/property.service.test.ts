@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { mockCollections, resetMocks } from './helpers';
+import { mockCollections, resetMocks } from './helpers.js';
 import {
   createProperty,
   getPropertyById,
@@ -7,7 +7,7 @@ import {
   deleteProperty,
   getPropertiesByOwner,
   searchProperties,
-} from '../services/property.service';
+} from '../services/property.service.js';
 
 const ownerId = '507f1f77bcf86cd799439011';
 const propertyId = '507f1f77bcf86cd799439012';

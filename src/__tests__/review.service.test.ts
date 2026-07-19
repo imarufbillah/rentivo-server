@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { mockCollections, resetMocks } from './helpers';
+import { mockCollections, resetMocks } from './helpers.js';
 import {
   createReview,
   getReviewsByProperty,
   getAverageRating,
   deleteReviewsByProperty,
   checkUserCanReview,
-} from '../services/review.service';
+} from '../services/review.service.js';
 
 const userId = '507f1f77bcf86cd799439011';
 const propertyId = '507f1f77bcf86cd799439012';

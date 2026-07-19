@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { mockCollections, resetMocks } from './helpers';
+import { mockCollections, resetMocks } from './helpers.js';
 
 vi.mock('../lib/db/collections', () => ({
   getCollections: vi.fn().mockResolvedValue(mockCollections),
 }));
 
 import express from 'express';
-import recommendationRoutes from '../routes/recommendation.routes';
+import recommendationRoutes from '../routes/recommendation.routes.js';
 
 const userId = '507f1f77bcf86cd799439011';
 const propertyId = '507f1f77bcf86cd799439013';

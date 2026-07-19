@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import * as reviewService from '../services/review.service';
-import { createReviewSchema } from '../lib/validation/review.schemas';
-import { logValidationError, logControllerError } from '../lib/logger';
+import * as reviewService from '../services/review.service.js';
+import { createReviewSchema } from '../lib/validation/review.schemas.js';
+import { logValidationError, logControllerError } from '../lib/logger.js';
 
 export const createReview = async (req: Request, res: Response) => {
   try {

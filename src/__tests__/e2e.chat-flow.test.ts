@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { mockCollections, resetMocks } from './helpers';
+import { mockCollections, resetMocks } from './helpers.js';
 
 vi.mock('../lib/db/collections', () => ({
   getCollections: vi.fn().mockResolvedValue(mockCollections),
 }));
 
-vi.mock('../services/chat.service', () => ({
+vi.mock('../services/chat.service.js', () => ({
   sendMessage: vi.fn(),
   generateFollowUpSuggestions: vi.fn().mockResolvedValue([
     'Show me more apartments',
@@ -18,7 +18,7 @@ vi.mock('../services/recommendation.service', () => ({
 }));
 
 import express from 'express';
-import chatRoutes from '../routes/chat.routes';
+import chatRoutes from '../routes/chat.routes.js';
 
 const userId = '507f1f77bcf86cd799439011';
 
@@ -37,7 +37,7 @@ describe('E2E: Chat Assistant Flow (Req 24, 25, 26, 28)', () => {
   it('sends message and receives streaming response', async () => {
     const app = createApp();
 
-    const { sendMessage } = await import('../services/chat.service');
+    const { sendMessage } = await import('../services/chat.service.js');
     const mockStream = (async function* () {
       yield JSON.stringify({ type: 'token', content: 'Hello' });
       yield JSON.stringify({ type: 'token', content: ' there!' });
@@ -73,7 +73,7 @@ describe('E2E: Chat Assistant Flow (Req 24, 25, 26, 28)', () => {
   it('generates follow-up suggestions after reply', async () => {
     const app = createApp();
 
-    const { generateFollowUpSuggestions } = await import('../services/chat.service');
+    const { generateFollowUpSuggestions } = await import('../services/chat.service.js');
     vi.mocked(generateFollowUpSuggestions).mockResolvedValue([
       'Show me more apartments',
       'What about studios?',

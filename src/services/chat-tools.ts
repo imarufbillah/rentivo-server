@@ -1,6 +1,6 @@
-import * as propertyService from './property.service';
-import * as interactionService from './interaction.service';
-import * as reviewService from './review.service';
+import * as propertyService from './property.service.js';
+import * as interactionService from './interaction.service.js';
+import * as reviewService from './review.service.js';
 
 const toNumber = (value: unknown): number | undefined => {
   if (value === undefined || value === null || value === '') return undefined;

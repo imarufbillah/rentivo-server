@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createReviewSchema } from '../lib/validation/review.schemas';
+import { createReviewSchema } from '../lib/validation/review.schemas.js';
 
 const validReview = {
   propertyId: '507f1f77bcf86cd799439011',

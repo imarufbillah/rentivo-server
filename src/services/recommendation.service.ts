@@ -1,6 +1,6 @@
 import { ObjectId, Filter } from 'mongodb';
-import { getCollections } from '../lib/db/collections';
-import { Property, Interaction, RecommendationFilters, RecommendedProperty } from '../types';
+import { getCollections } from '../lib/db/collections.js';
+import { Property, Interaction, RecommendationFilters, RecommendedProperty } from '../types/index.js';
 
 const CANDIDATE_POOL_SIZE = 20;
 

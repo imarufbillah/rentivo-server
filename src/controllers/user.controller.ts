@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { getCollections } from '../lib/db/collections';
+import { getCollections } from '../lib/db/collections.js';
 import { ObjectId } from 'mongodb';
-import { logControllerError } from '../lib/logger';
+import { logControllerError } from '../lib/logger.js';
 
 export const upgradeToOwner = async (req: Request, res: Response) => {
   try {

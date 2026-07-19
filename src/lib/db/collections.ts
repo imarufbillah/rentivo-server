@@ -1,6 +1,6 @@
-import clientPromise from './mongodb';
+import clientPromise from './mongodb.js';
 import { Db, Collection } from 'mongodb';
-import { User, Property, Interaction, Review, Rental } from '../../types/index';
+import { User, Property, Interaction, Review, Rental } from '../../types/index.js';
 
 let cachedDb: Db | null = null;
 

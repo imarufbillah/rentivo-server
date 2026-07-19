@@ -1,5 +1,5 @@
 import { ObjectId, Filter } from 'mongodb';
-import { getCollections } from '../lib/db/collections';
+import { getCollections } from '../lib/db/collections.js';
 import {
   Property,
   PropertyWithStats,
@@ -8,7 +8,7 @@ import {
   PropertyFilters,
   Pagination,
   PaginatedResult,
-} from '../types';
+} from '../types/index.js';
 
 const LIST_PROJECTION = {
   description: 0,

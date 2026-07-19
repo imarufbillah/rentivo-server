@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { mockCollections, resetMocks } from './helpers';
+import { mockCollections, resetMocks } from './helpers.js';
 import {
   buildCandidatePool,
   getInteractionCount,
   getFallbackRecommendations,
   getRecommendations,
-} from '../services/recommendation.service';
+} from '../services/recommendation.service.js';
 
 const userId = '507f1f77bcf86cd799439011';
 

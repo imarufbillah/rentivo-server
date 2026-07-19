@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
-import { getCollections } from '../lib/db/collections';
-import { Review, PropertyWithStats } from '../types';
+import { getCollections } from '../lib/db/collections.js';
+import { Review, PropertyWithStats } from '../types/index.js';
 
 const ensureObjectId = (id: string): ObjectId => {
   if (!ObjectId.isValid(id)) {

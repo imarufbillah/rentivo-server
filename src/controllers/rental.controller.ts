@@ -1,8 +1,8 @@
 import Stripe from 'stripe';
 import { Request, Response } from 'express';
-import * as rentalService from '../services/rental.service';
-import { stripe } from '../lib/stripe';
-import { logControllerError } from '../lib/logger';
+import * as rentalService from '../services/rental.service.js';
+import { stripe } from '../lib/stripe.js';
+import { logControllerError } from '../lib/logger.js';
 
 export const createCheckout = async (req: Request, res: Response) => {
   try {

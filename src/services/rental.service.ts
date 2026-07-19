@@ -1,8 +1,8 @@
 import Stripe from 'stripe';
 import { ObjectId } from 'mongodb';
-import { getCollections } from '../lib/db/collections';
-import { stripe } from '../lib/stripe';
-import { Rental, Property, RentalStatus, RentalWithProperty } from '../types';
+import { getCollections } from '../lib/db/collections.js';
+import { stripe } from '../lib/stripe.js';
+import { Rental, Property, RentalStatus, RentalWithProperty } from '../types/index.js';
 
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
 
