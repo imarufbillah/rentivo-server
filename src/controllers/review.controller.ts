@@ -14,11 +14,11 @@ export const createReview = async (req: Request, res: Response) => {
 
     const { propertyId, rating, comment } = parsed.data;
 
-    const hasViewed = await reviewService.checkUserHasViewedProperty(req.user!.id, propertyId);
-    if (!hasViewed) {
+    const canReview = await reviewService.checkUserCanReview(req.user!.id, propertyId);
+    if (!canReview) {
       return res.status(403).json({
         success: false,
-        error: { code: 'REVIEW_NOT_ALLOWED', message: 'You must view a property before reviewing it' },
+        error: { code: 'REVIEW_NOT_ALLOWED', message: 'You must be an active renter to review this property' },
       });
     }
 

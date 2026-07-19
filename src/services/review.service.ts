@@ -127,19 +127,19 @@ export const getReviewStatsByOwner = async (
   return result;
 };
 
-export const checkUserHasViewedProperty = async (
+export const checkUserCanReview = async (
   userId: string,
   propertyId: string
 ): Promise<boolean> => {
-  const { interactions } = await getCollections();
+  const { rentals } = await getCollections();
 
-  const interaction = await interactions.findOne({
-    userId: new ObjectId(userId),
+  const rental = await rentals.findOne({
+    renterId: new ObjectId(userId),
     propertyId: new ObjectId(propertyId),
-    type: 'view',
+    status: 'active',
   });
 
-  return interaction !== null;
+  return rental !== null;
 };
 
 export const ensureIndexes = async (): Promise<void> => {

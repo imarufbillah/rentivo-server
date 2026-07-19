@@ -23,6 +23,7 @@ export const mockCollections = {
   properties: createMockCollection(),
   interactions: createMockCollection(),
   reviews: createMockCollection(),
+  rentals: createMockCollection(),
 };
 
 export const resetMocks = () => {

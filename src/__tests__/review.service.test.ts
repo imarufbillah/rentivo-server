@@ -5,7 +5,7 @@ import {
   getReviewsByProperty,
   getAverageRating,
   deleteReviewsByProperty,
-  checkUserHasViewedProperty,
+  checkUserCanReview,
 } from '../services/review.service';
 
 const userId = '507f1f77bcf86cd799439011';
@@ -112,22 +112,22 @@ describe('deleteReviewsByProperty', () => {
   });
 });
 
-describe('checkUserHasViewedProperty', () => {
-  it('returns true when view interaction exists', async () => {
-    mockCollections.interactions.findOne.mockResolvedValue({ _id: 'view' });
+describe('checkUserCanReview', () => {
+  it('returns true when active rental exists', async () => {
+    mockCollections.rentals.findOne.mockResolvedValue({ _id: 'rental', status: 'active' });
 
-    const result = await checkUserHasViewedProperty(userId, propertyId);
+    const result = await checkUserCanReview(userId, propertyId);
 
     expect(result).toBe(true);
-    expect(mockCollections.interactions.findOne).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'view' })
+    expect(mockCollections.rentals.findOne).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'active' })
     );
   });
 
-  it('returns false when no view interaction exists', async () => {
-    mockCollections.interactions.findOne.mockResolvedValue(null);
+  it('returns false when no active rental exists', async () => {
+    mockCollections.rentals.findOne.mockResolvedValue(null);
 
-    const result = await checkUserHasViewedProperty(userId, propertyId);
+    const result = await checkUserCanReview(userId, propertyId);
 
     expect(result).toBe(false);
   });
