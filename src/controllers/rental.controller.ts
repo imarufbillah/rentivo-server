@@ -5,7 +5,6 @@ import { stripe } from '../lib/stripe';
 export const createCheckout = async (req: Request, res: Response) => {
   try {
     const { propertyId } = req.body;
-    console.log('[Rental] createCheckout called, propertyId:', propertyId, 'body:', JSON.stringify(req.body));
     if (!propertyId) {
       return res.status(400).json({
         success: false,
@@ -30,6 +29,26 @@ export const createCheckout = async (req: Request, res: Response) => {
         code: status === 404 ? 'RESOURCE_NOT_FOUND' : status === 403 ? 'FORBIDDEN' : 'INTERNAL_ERROR',
         message,
       },
+    });
+  }
+};
+
+export const cancelPending = async (req: Request, res: Response) => {
+  try {
+    const { propertyId } = req.body;
+    if (!propertyId) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_FAILED', message: 'propertyId is required' },
+      });
+    }
+
+    const result = await rentalService.cancelPendingRental(propertyId, req.user!.id);
+    res.json({ success: true, data: result });
+  } catch {
+    res.status(500).json({
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'Failed to cancel rental' },
     });
   }
 };

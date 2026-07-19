@@ -12,10 +12,7 @@ export const createCheckoutSession = async (
   const { properties, rentals } = await getCollections();
 
   const property = await properties.findOne({ _id: new ObjectId(propertyId) });
-  console.log('[Rental] findOne result:', !!property, 'propertyId:', propertyId, 'ownerId:', property?.ownerId?.toString());
   if (!property) {
-    const count = await properties.countDocuments();
-    console.log('[Rental] total properties in collection:', count);
     throw new Error('Property not found');
   }
 
@@ -27,13 +24,10 @@ export const createCheckoutSession = async (
     throw new Error('Cannot rent your own property');
   }
 
-  const existingRental = await rentals.findOne({
+  await rentals.deleteMany({
     propertyId: new ObjectId(propertyId),
-    status: { $in: ['pending', 'active'] },
+    status: 'pending',
   });
-  if (existingRental) {
-    throw new Error('Property is already rented or has a pending rental');
-  }
 
   const monthlyRent = property.price;
   const securityDeposit = property.securityDeposit || 0;
@@ -222,4 +216,17 @@ export const ensureRentalIndexes = async (): Promise<void> => {
     rentals.createIndex({ renterId: 1, status: 1 }),
     rentals.createIndex({ stripeSessionId: 1 }, { sparse: true }),
   ]);
+};
+
+export const cancelPendingRental = async (
+  propertyId: string,
+  renterId: string
+): Promise<{ cancelled: boolean }> => {
+  const { rentals } = await getCollections();
+  const result = await rentals.deleteMany({
+    propertyId: new ObjectId(propertyId),
+    renterId: new ObjectId(renterId),
+    status: 'pending',
+  });
+  return { cancelled: result.deletedCount > 0 };
 };
