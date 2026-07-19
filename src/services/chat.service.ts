@@ -37,7 +37,7 @@ const streamToString = async function* (
 ): AsyncGenerator<string> {
   const stream = await client.chat.completions.create({
     model: 'llama-3.3-70b-versatile',
-    messages: msgs,
+    messages: msgs as any,
     stream: true,
   });
 
@@ -109,16 +109,16 @@ export const sendMessage = async function* (
       }
     }
 
-    const followUpMessages = [
+    const followUpMessages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
       { role: 'system', content: 'You received property data from tools. Format and present ONLY the properties from these results as a numbered list. Do NOT invent any additional properties. If results are empty, say "No properties match those criteria." Format: Title, Location, $Price/mo, Type.' },
-      ...messages.filter((m) => m.role !== 'system'),
+      ...messages.filter((m) => m.role !== 'system').map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
       { role: 'user', content: `Tool results:\n${toolResults.join('\n')}\n\nPresent these results to the user now.` },
     ];
 
     try {
       const followUp = await client.chat.completions.create({
         model: 'llama-3.3-70b-versatile',
-        messages: followUpMessages,
+        messages: followUpMessages as any,
         stream: true,
       });
 

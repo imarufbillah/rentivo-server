@@ -1,3 +1,4 @@
+import Stripe from 'stripe';
 import { Request, Response } from 'express';
 import * as rentalService from '../services/rental.service';
 import { stripe } from '../lib/stripe';
@@ -88,7 +89,7 @@ export const webhook = async (req: Request, res: Response) => {
     });
   }
 
-  let event: import('stripe').Event;
+  let event: Stripe.Event;
 
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
@@ -127,7 +128,7 @@ export const getMyRentals = async (req: Request, res: Response) => {
 
 export const getPropertyRentalStatus = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const status = await rentalService.getPropertyRentalStatus(id);
     res.json({ success: true, data: status });
   } catch (error) {

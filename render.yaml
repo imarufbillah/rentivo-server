@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: rentivo-server
+    runtime: node
+    rootDir: rentivo-server
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GROQ_API_KEY
+        sync: false
+      - key: AUTH_BASE_URL
+        fromService:
+          type: web
+          name: rentivo-server
+          property: url
+      - key: CLIENT_URL
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false

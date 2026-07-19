@@ -1,7 +1,8 @@
+import Stripe from 'stripe';
 import { ObjectId } from 'mongodb';
 import { getCollections } from '../lib/db/collections';
 import { stripe } from '../lib/stripe';
-import { Rental, Property, RentalStatus } from '../types';
+import { Rental, Property, RentalStatus, RentalWithProperty } from '../types';
 
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
 
@@ -191,7 +192,7 @@ export const getPropertyRentalStatus = async (
   return { isRented: !!rental, rental };
 };
 
-export const getUserRentals = async (userId: string): Promise<import('../types').RentalWithProperty[]> => {
+export const getUserRentals = async (userId: string): Promise<RentalWithProperty[]> => {
   const { rentals } = await getCollections();
   return rentals
     .aggregate([
@@ -219,7 +220,7 @@ export const getUserRentals = async (userId: string): Promise<import('../types')
         },
       },
     ])
-    .toArray();
+    .toArray() as Promise<RentalWithProperty[]>;
 };
 
 export const getOwnerRentals = async (ownerId: string): Promise<Rental[]> => {
