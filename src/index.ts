@@ -9,6 +9,9 @@ import reviewRoutes from './routes/review.routes';
 import recommendationRoutes from './routes/recommendation.routes';
 import chatRoutes from './routes/chat.routes';
 import userRoutes from './routes/user.routes';
+import { ensureIndexes as ensurePropertyIndexes } from './services/property.service';
+import { ensureIndexes as ensureInteractionIndexes } from './services/interaction.service';
+import { ensureIndexes as ensureReviewIndexes } from './services/review.service';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -67,9 +70,15 @@ app.use(errorHandler);
 
 const startServer = async () => {
   try {
-    // Ensure MongoDB connection is established before starting server
     await clientPromise;
     console.log('Successfully connected to MongoDB');
+
+    await Promise.all([
+      ensurePropertyIndexes(),
+      ensureInteractionIndexes(),
+      ensureReviewIndexes(),
+    ]);
+    console.log('Database indexes ensured');
 
     app.listen(PORT, () => {
       console.log(`Rentivo server listening on port ${PORT}`);
