@@ -4,7 +4,7 @@ export type PropertyType = 'apartment' | 'house' | 'room' | 'studio' | 'villa';
 export type PropertyStatus = 'active' | 'pending' | 'archived';
 export type InteractionType = 'view' | 'save';
 export type UserRole = 'renter' | 'owner';
-export type SortField = 'price' | 'createdAt';
+export type SortField = 'price' | 'createdAt' | 'bedrooms';
 export type SortOrder = 'asc' | 'desc';
 
 export interface User {
@@ -30,6 +30,9 @@ export interface Property {
   images: string[];
   status: PropertyStatus;
   ownerId: ObjectId;
+  bedrooms: number;
+  bathrooms: number;
+  amenities: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -65,6 +68,9 @@ export interface CreatePropertyDTO {
   propertyType: PropertyType;
   images: string[];
   status?: PropertyStatus;
+  bedrooms?: number;
+  bathrooms?: number;
+  amenities?: string[];
 }
 
 export type UpdatePropertyDTO = Partial<CreatePropertyDTO>;
@@ -75,6 +81,12 @@ export interface PropertyFilters {
   minPrice?: number;
   maxPrice?: number;
   propertyType?: PropertyType;
+  minBedrooms?: number;
+  maxBedrooms?: number;
+  minBathrooms?: number;
+  maxBathrooms?: number;
+  amenities?: string[];
+  minRating?: number;
   sortBy?: SortField;
   sortOrder?: SortOrder;
 }

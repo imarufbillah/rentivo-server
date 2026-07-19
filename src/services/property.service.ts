@@ -32,6 +32,9 @@ export const createProperty = async (
   const property: Property = {
     ...data,
     status: data.status || 'active',
+    bedrooms: data.bedrooms ?? 1,
+    bathrooms: data.bathrooms ?? 1,
+    amenities: data.amenities ?? [],
     ownerId: new ObjectId(ownerId),
     createdAt: now,
     updatedAt: now,
@@ -108,7 +111,7 @@ export const searchProperties = async (
   filters: PropertyFilters,
   pagination: Pagination
 ): Promise<PaginatedResult<Property>> => {
-  const { properties } = await getCollections();
+  const { properties, reviews } = await getCollections();
 
   const page = pagination.page || 1;
   const limit = pagination.limit || 12;
@@ -134,11 +137,99 @@ export const searchProperties = async (
     filter.propertyType = filters.propertyType;
   }
 
+  if (filters.minBedrooms !== undefined || filters.maxBedrooms !== undefined) {
+    filter.bedrooms = {};
+    if (filters.minBedrooms !== undefined) filter.bedrooms.$gte = filters.minBedrooms;
+    if (filters.maxBedrooms !== undefined) filter.bedrooms.$lte = filters.maxBedrooms;
+  }
+
+  if (filters.minBathrooms !== undefined || filters.maxBathrooms !== undefined) {
+    filter.bathrooms = {};
+    if (filters.minBathrooms !== undefined) filter.bathrooms.$gte = filters.minBathrooms;
+    if (filters.maxBathrooms !== undefined) filter.bathrooms.$lte = filters.maxBathrooms;
+  }
+
+  if (filters.amenities && filters.amenities.length > 0) {
+    filter.amenities = { $all: filters.amenities };
+  }
+
   const sort: Record<string, 1 | -1> = {};
   if (filters.sortBy) {
     sort[filters.sortBy] = filters.sortOrder === 'asc' ? 1 : -1;
   } else {
     sort.createdAt = -1;
+  }
+
+  if (filters.minRating !== undefined) {
+    const ratingMatch: Filter<Property> = { ...filter };
+
+    const aggPipeline = [
+      { $match: ratingMatch },
+      {
+        $lookup: {
+          from: 'reviews',
+          localField: '_id',
+          foreignField: 'propertyId',
+          as: 'reviewDocs',
+        },
+      },
+      {
+        $addFields: {
+          avgRating: {
+            $cond: {
+              if: { $gt: [{ $size: '$reviewDocs' }, 0] },
+              then: { $avg: '$reviewDocs.rating' },
+              else: null,
+            },
+          },
+        },
+      },
+      { $match: { avgRating: { $gte: filters.minRating, $ne: null } } },
+      { $sort: sort },
+      { $skip: skip },
+      { $limit: limit },
+      { $project: { reviewDocs: 0, avgRating: 0 } },
+    ];
+
+    const [results, countPipeline] = await Promise.all([
+      properties.aggregate(aggPipeline).toArray(),
+      properties.aggregate([
+        { $match: ratingMatch },
+        {
+          $lookup: {
+            from: 'reviews',
+            localField: '_id',
+            foreignField: 'propertyId',
+            as: 'reviewDocs',
+          },
+        },
+        {
+          $addFields: {
+            avgRating: {
+              $cond: {
+                if: { $gt: [{ $size: '$reviewDocs' }, 0] },
+                then: { $avg: '$reviewDocs.rating' },
+                else: null,
+              },
+            },
+          },
+        },
+        { $match: { avgRating: { $gte: filters.minRating, $ne: null } } },
+        { $count: 'total' },
+      ]).toArray(),
+    ]);
+
+    const total = countPipeline[0]?.total || 0;
+
+    return {
+      data: results as Property[],
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   const [data, total] = await Promise.all([
