@@ -18,7 +18,7 @@ const demoProperties = [
     status: 'active' as const,
     bedrooms: 0,
     bathrooms: 1,
-    amenities: ['wifi', 'laundry', 'ac'],
+    amenities: ['wifi', 'laundry', 'ac', 'kitchen', 'hardwood'],
   },
   {
     title: 'Modern 2BR Apartment with Manhattan Views',
@@ -30,7 +30,7 @@ const demoProperties = [
     status: 'active' as const,
     bedrooms: 2,
     bathrooms: 2,
-    amenities: ['wifi', 'gym', 'doorman', 'elevator', 'ac'],
+    amenities: ['wifi', 'gym', 'doorman', 'elevator', 'ac', 'kitchen', 'dishwasher', 'views'],
   },
   {
     title: 'Cozy Room in Shared Brownstone',
@@ -42,7 +42,7 @@ const demoProperties = [
     status: 'active' as const,
     bedrooms: 1,
     bathrooms: 1,
-    amenities: ['wifi', 'laundry'],
+    amenities: ['wifi', 'laundry', 'kitchen', 'furnished'],
   },
   {
     title: 'Luxury Villa with Private Garden',
@@ -54,7 +54,7 @@ const demoProperties = [
     status: 'active' as const,
     bedrooms: 4,
     bathrooms: 3,
-    amenities: ['wifi', 'parking', 'pool', 'gym', 'ac', 'balcony', 'fireplace'],
+    amenities: ['wifi', 'parking', 'pool', 'gym', 'ac', 'balcony', 'fireplace', 'kitchen', 'garage', 'garden', 'patio', 'washer/dryer'],
   },
   {
     title: 'Charming House near Central Park',
@@ -66,7 +66,7 @@ const demoProperties = [
     status: 'active' as const,
     bedrooms: 3,
     bathrooms: 2,
-    amenities: ['wifi', 'parking', 'fireplace', 'hardwood', 'balcony'],
+    amenities: ['wifi', 'parking', 'fireplace', 'hardwood', 'balcony', 'kitchen', 'garden', 'furnished'],
   },
   {
     title: 'Affordable Apartment in Astoria',
@@ -78,7 +78,7 @@ const demoProperties = [
     status: 'active' as const,
     bedrooms: 1,
     bathrooms: 1,
-    amenities: ['wifi', 'laundry', 'ac'],
+    amenities: ['wifi', 'laundry', 'ac', 'kitchen'],
   },
   {
     title: 'Penthouse Loft in SoHo',
@@ -90,7 +90,7 @@ const demoProperties = [
     status: 'active' as const,
     bedrooms: 2,
     bathrooms: 2,
-    amenities: ['wifi', 'elevator', 'balcony', 'hardwood', 'ac', 'bike'],
+    amenities: ['wifi', 'elevator', 'balcony', 'hardwood', 'ac', 'bike', 'kitchen', 'dishwasher', 'views', 'patio'],
   },
   {
     title: 'Quiet Studio near Columbia University',
@@ -102,7 +102,7 @@ const demoProperties = [
     status: 'active' as const,
     bedrooms: 0,
     bathrooms: 1,
-    amenities: ['wifi', 'laundry'],
+    amenities: ['wifi', 'laundry', 'kitchen', 'furnished'],
   },
   {
     title: 'Spacious 3BR in Park Slope',
@@ -114,7 +114,7 @@ const demoProperties = [
     status: 'active' as const,
     bedrooms: 3,
     bathrooms: 2,
-    amenities: ['wifi', 'laundry', 'hardwood', 'dishwasher', 'storage'],
+    amenities: ['wifi', 'laundry', 'hardwood', 'dishwasher', 'storage', 'kitchen', 'garden'],
   },
   {
     title: 'Bright Room in Harlem Brownstone',
@@ -126,7 +126,7 @@ const demoProperties = [
     status: 'active' as const,
     bedrooms: 1,
     bathrooms: 1,
-    amenities: ['wifi', 'balcony'],
+    amenities: ['wifi', 'balcony', 'kitchen', 'garden', 'furnished'],
   },
   {
     title: 'Waterfront Condo in Long Island City',
@@ -138,7 +138,7 @@ const demoProperties = [
     status: 'active' as const,
     bedrooms: 2,
     bathrooms: 2,
-    amenities: ['wifi', 'parking', 'pool', 'gym', 'laundry', 'doorman', 'elevator'],
+    amenities: ['wifi', 'parking', 'pool', 'gym', 'laundry', 'doorman', 'elevator', 'kitchen', 'dishwasher', 'views', 'washer/dryer'],
   },
   {
     title: 'Renovated House in Staten Island',
@@ -150,7 +150,7 @@ const demoProperties = [
     status: 'active' as const,
     bedrooms: 4,
     bathrooms: 3,
-    amenities: ['wifi', 'parking', 'ac', 'balcony', 'fireplace', 'storage'],
+    amenities: ['wifi', 'parking', 'ac', 'balcony', 'fireplace', 'storage', 'kitchen', 'garage', 'garden', 'patio'],
   },
 ];
 
