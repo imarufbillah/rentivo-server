@@ -5,6 +5,7 @@ import { stripe } from '../lib/stripe';
 export const createCheckout = async (req: Request, res: Response) => {
   try {
     const { propertyId } = req.body;
+    console.log('[Rental] createCheckout called, propertyId:', propertyId, 'body:', JSON.stringify(req.body));
     if (!propertyId) {
       return res.status(400).json({
         success: false,

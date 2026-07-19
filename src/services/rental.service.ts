@@ -9,10 +9,13 @@ export const createCheckoutSession = async (
   propertyId: string,
   renterId: string
 ): Promise<{ checkoutUrl: string; rentalId: string }> => {
-  const { properties, users, rentals } = await getCollections();
+  const { properties, rentals } = await getCollections();
 
   const property = await properties.findOne({ _id: new ObjectId(propertyId) });
+  console.log('[Rental] findOne result:', !!property, 'propertyId:', propertyId, 'ownerId:', property?.ownerId?.toString());
   if (!property) {
+    const count = await properties.countDocuments();
+    console.log('[Rental] total properties in collection:', count);
     throw new Error('Property not found');
   }
 
@@ -30,11 +33,6 @@ export const createCheckoutSession = async (
   });
   if (existingRental) {
     throw new Error('Property is already rented or has a pending rental');
-  }
-
-  const renter = await users.findOne({ _id: new ObjectId(renterId) });
-  if (!renter) {
-    throw new Error('Renter not found');
   }
 
   const monthlyRent = property.price;
