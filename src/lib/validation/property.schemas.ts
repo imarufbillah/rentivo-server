@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const propertyTypeEnum = z.enum(['apartment', 'house', 'room', 'studio', 'villa']);
-export const propertyStatusEnum = z.enum(['active', 'pending', 'archived']);
+export const propertyStatusEnum = z.enum(['active', 'pending', 'archived', 'rented']);
 export const furnishingEnum = z.enum(['furnished', 'semi-furnished', 'unfurnished']);
 export const conditionEnum = z.enum(['new', 'excellent', 'good', 'fair']);
 export const parkingEnum = z.enum(['included', 'available', 'none']);
@@ -19,8 +19,8 @@ export const createPropertySchema = z.object({
   propertyType: propertyTypeEnum,
   images: z.array(z.string().url()).min(1).max(6),
   status: propertyStatusEnum.optional().default('active'),
-  bedrooms: z.number().int().min(0).max(20).optional().default(1),
-  bathrooms: z.number().int().min(0).max(20).optional().default(1),
+  bedrooms: z.number().int().min(0).max(100).optional().default(1),
+  bathrooms: z.number().int().min(0).max(100).optional().default(1),
   amenities: z.array(amenityString).optional().default([]),
   size: z.number().positive().optional(),
   balconies: z.number().int().nonnegative().optional(),
