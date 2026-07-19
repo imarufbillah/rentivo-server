@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
 import * as propertyService from '../services/property.service';
+import * as interactionService from '../services/interaction.service';
+import * as reviewService from '../services/review.service';
 import { createPropertySchema, updatePropertySchema, propertyFilterSchema } from '../lib/validation/property.schemas';
+import { PropertyWithStats } from '../types';
 
 export const createProperty = async (req: Request, res: Response) => {
   try {
@@ -104,7 +107,28 @@ export const deleteProperty = async (req: Request, res: Response) => {
 export const getMyProperties = async (req: Request, res: Response) => {
   try {
     const properties = await propertyService.getPropertiesByOwner(req.user!.id);
-    res.json({ success: true, data: { properties } });
+
+    const [interactionCounts, reviewStats] = await Promise.all([
+      interactionService.getInteractionCountsByOwner(req.user!.id),
+      reviewService.getReviewStatsByOwner(req.user!.id),
+    ]);
+
+    const propertiesWithStats: PropertyWithStats[] = properties.map((property) => {
+      const propertyId = property._id!.toString();
+      const interactions = interactionCounts.get(propertyId) || { views: 0, saves: 0, dismisses: 0 };
+      const reviews = reviewStats.get(propertyId) || { averageRating: null, totalReviews: 0 };
+
+      return {
+        ...property,
+        viewCount: interactions.views,
+        saveCount: interactions.saves,
+        dismissCount: interactions.dismisses,
+        averageRating: reviews.averageRating,
+        totalReviews: reviews.totalReviews,
+      };
+    });
+
+    res.json({ success: true, data: { properties: propertiesWithStats } });
   } catch {
     res.status(500).json({
       success: false,

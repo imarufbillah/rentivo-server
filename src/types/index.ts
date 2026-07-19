@@ -106,3 +106,11 @@ export interface RecommendedProperty {
   explanation: string;
   score?: number;
 }
+
+export interface PropertyWithStats extends Property {
+  viewCount: number;
+  saveCount: number;
+  dismissCount: number;
+  averageRating: number | null;
+  totalReviews: number;
+}

@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { getCollections } from '../lib/db/collections';
-import { Review } from '../types';
+import { Review, PropertyWithStats } from '../types';
 
 const ensureObjectId = (id: string): ObjectId => {
   if (!ObjectId.isValid(id)) {
@@ -77,6 +77,54 @@ export const getAverageRating = async (propertyId: string): Promise<number | nul
 export const deleteReviewsByProperty = async (propertyId: string): Promise<void> => {
   const { reviews } = await getCollections();
   await reviews.deleteMany({ propertyId: ensureObjectId(propertyId) });
+};
+
+export const getReviewStatsByOwner = async (
+  ownerId: string
+): Promise<Map<string, { averageRating: number | null; totalReviews: number }>> => {
+  const { reviews, properties } = await getCollections();
+  const ownerObjectId = new ObjectId(ownerId);
+
+  const ownerProperties = await properties
+    .find({ ownerId: ownerObjectId })
+    .project({ _id: 1 })
+    .toArray();
+
+  if (ownerProperties.length === 0) {
+    return new Map();
+  }
+
+  const propertyIds = ownerProperties.map((p) => p._id);
+
+  const stats = await reviews
+    .aggregate([
+      { $match: { propertyId: { $in: propertyIds } } },
+      {
+        $group: {
+          _id: '$propertyId',
+          avgRating: { $avg: '$rating' },
+          count: { $sum: 1 },
+        },
+      },
+    ])
+    .toArray();
+
+  const result = new Map<string, { averageRating: number | null; totalReviews: number }>();
+
+  for (const prop of ownerProperties) {
+    const id = prop._id!.toString();
+    result.set(id, { averageRating: null, totalReviews: 0 });
+  }
+
+  for (const item of stats) {
+    const propertyId = item._id.toString();
+    result.set(propertyId, {
+      averageRating: Math.round(item.avgRating * 10) / 10,
+      totalReviews: item.count,
+    });
+  }
+
+  return result;
 };
 
 export const checkUserHasViewedProperty = async (
