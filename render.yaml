@@ -15,10 +15,7 @@ services:
       - key: GROQ_API_KEY
         sync: false
       - key: AUTH_BASE_URL
-        fromService:
-          type: web
-          name: rentivo-server
-          property: url
+        sync: false
       - key: CLIENT_URL
         sync: false
       - key: STRIPE_SECRET_KEY
