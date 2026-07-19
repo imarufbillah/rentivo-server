@@ -17,10 +17,38 @@ export const trackInteraction = async (
   type: InteractionType
 ): Promise<Interaction> => {
   const { interactions } = await getCollections();
+  const userObjectId = new ObjectId(userId);
+  const propertyObjectId = new ObjectId(propertyId);
+
+  if (type === 'view') {
+    const existing = await interactions.findOne({
+      userId: userObjectId,
+      propertyId: propertyObjectId,
+      type: 'view',
+    });
+
+    if (existing) {
+      await interactions.updateOne(
+        { _id: existing._id },
+        { $set: { createdAt: new Date() } }
+      );
+      return { ...existing, createdAt: new Date() };
+    }
+  } else {
+    const existing = await interactions.findOne({
+      userId: userObjectId,
+      propertyId: propertyObjectId,
+      type,
+    });
+
+    if (existing) {
+      return existing;
+    }
+  }
 
   const interaction: Interaction = {
-    userId: new ObjectId(userId),
-    propertyId: new ObjectId(propertyId),
+    userId: userObjectId,
+    propertyId: propertyObjectId,
     type,
     createdAt: new Date(),
   };
@@ -117,6 +145,30 @@ export const deleteInteraction = async (
     propertyId: new ObjectId(propertyId),
     type,
   });
+};
+
+export const getUserInteractionState = async (
+  userId: string,
+  propertyId: string
+): Promise<{ hasViewed: boolean; hasSaved: boolean; hasDismissed: boolean }> => {
+  const { interactions } = await getCollections();
+  const userObjectId = new ObjectId(userId);
+  const propertyObjectId = new ObjectId(propertyId);
+
+  const docs = await interactions
+    .find({
+      userId: userObjectId,
+      propertyId: propertyObjectId,
+      type: { $in: ['view', 'save', 'dismiss'] },
+    })
+    .project({ type: 1 })
+    .toArray();
+
+  return {
+    hasViewed: docs.some((d) => d.type === 'view'),
+    hasSaved: docs.some((d) => d.type === 'save'),
+    hasDismissed: docs.some((d) => d.type === 'dismiss'),
+  };
 };
 
 export const deleteInteractionsByProperty = async (propertyId: string): Promise<void> => {

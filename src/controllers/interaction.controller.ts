@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import * as interactionService from '../services/interaction.service';
-import { createInteractionSchema, getInteractionHistorySchema, deleteInteractionSchema } from '../lib/validation/interaction.schemas';
+import { createInteractionSchema, getInteractionHistorySchema, deleteInteractionSchema, propertyIdParamSchema } from '../lib/validation/interaction.schemas';
 
 export const trackInteraction = async (req: Request, res: Response) => {
   try {
@@ -82,6 +82,30 @@ export const deleteInteraction = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Failed to delete interaction' },
+    });
+  }
+};
+
+export const getUserInteractionState = async (req: Request, res: Response) => {
+  try {
+    const parsed = propertyIdParamSchema.safeParse(req.params);
+    if (!parsed.success) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_FAILED', message: parsed.error.issues[0].message },
+      });
+    }
+
+    const state = await interactionService.getUserInteractionState(
+      req.user!.id,
+      parsed.data.propertyId
+    );
+
+    res.json({ success: true, data: state });
+  } catch {
+    res.status(500).json({
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch interaction state' },
     });
   }
 };

@@ -21,3 +21,9 @@ export const deleteInteractionSchema = z.object({
 });
 
 export type DeleteInteractionInput = z.infer<typeof deleteInteractionSchema>;
+
+export const propertyIdParamSchema = z.object({
+  propertyId: z.string().length(24),
+});
+
+export type PropertyIdParamInput = z.infer<typeof propertyIdParamSchema>;
