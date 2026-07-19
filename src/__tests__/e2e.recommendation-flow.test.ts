@@ -74,27 +74,6 @@ describe('E2E: Recommendation Flow (Req 19, 20, 21)', () => {
     expect(res.status).toBe(401);
   });
 
-  it('dismissed properties are excluded from recommendations', async () => {
-    const app = createApp();
-
-    // Mock: user has dismissed a property
-    mockCollections.interactions.countDocuments.mockResolvedValue(3);
-    mockCollections.interactions.find.mockReturnThis();
-    mockCollections.interactions.toArray.mockResolvedValue([
-      { propertyId: { toString: () => '2' }, type: 'dismiss' },
-    ]);
-
-    mockCollections.properties.find.mockReturnThis();
-    mockCollections.properties.toArray.mockResolvedValue([]);
-
-    const res = await (await import('supertest')).default(app)
-      .get('/api/recommendations')
-      .set('Authorization', `Bearer valid-token`);
-
-    // Auth check happens first
-    expect(res.status).toBe(401);
-  });
-
   it('applies filters as hard constraints before LLM ranking', async () => {
     const app = createApp();
 

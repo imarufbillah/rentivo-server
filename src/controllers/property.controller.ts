@@ -115,14 +115,13 @@ export const getMyProperties = async (req: Request, res: Response) => {
 
     const propertiesWithStats: PropertyWithStats[] = properties.map((property) => {
       const propertyId = property._id!.toString();
-      const interactions = interactionCounts.get(propertyId) || { views: 0, saves: 0, dismisses: 0 };
+      const interactions = interactionCounts.get(propertyId) || { views: 0, saves: 0 };
       const reviews = reviewStats.get(propertyId) || { averageRating: null, totalReviews: 0 };
 
       return {
         ...property,
         viewCount: interactions.views,
         saveCount: interactions.saves,
-        dismissCount: interactions.dismisses,
         averageRating: reviews.averageRating,
         totalReviews: reviews.totalReviews,
       };

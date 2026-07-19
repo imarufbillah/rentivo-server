@@ -30,11 +30,6 @@ describe('trackInteraction', () => {
     expect(result.type).toBe('save');
   });
 
-  it('creates a dismiss interaction', async () => {
-    const result = await trackInteraction(userId, propertyId, 'dismiss');
-    expect(result.type).toBe('dismiss');
-  });
-
   it('calls capInteractionHistory after tracking', async () => {
     mockCollections.interactions.countDocuments.mockResolvedValue(50);
 

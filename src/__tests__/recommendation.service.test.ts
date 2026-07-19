@@ -14,23 +14,7 @@ beforeEach(() => {
 });
 
 describe('buildCandidatePool', () => {
-  it('excludes dismissed properties', async () => {
-    mockCollections.interactions.toArray.mockResolvedValue([
-      { propertyId: { toString: () => 'dismissed1' } },
-    ]);
-    mockCollections.properties.toArray.mockResolvedValue([]);
-
-    await buildCandidatePool(userId, {});
-
-    expect(mockCollections.properties.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        _id: { $nin: expect.any(Array) },
-      })
-    );
-  });
-
   it('applies location filter', async () => {
-    mockCollections.interactions.toArray.mockResolvedValue([]);
     mockCollections.properties.toArray.mockResolvedValue([]);
 
     await buildCandidatePool(userId, { location: 'New York' });
@@ -41,7 +25,6 @@ describe('buildCandidatePool', () => {
   });
 
   it('applies price range filter', async () => {
-    mockCollections.interactions.toArray.mockResolvedValue([]);
     mockCollections.properties.toArray.mockResolvedValue([]);
 
     await buildCandidatePool(userId, { minPrice: 1000, maxPrice: 2000 });

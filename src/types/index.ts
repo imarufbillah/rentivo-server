@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb';
 
 export type PropertyType = 'apartment' | 'house' | 'room' | 'studio' | 'villa';
 export type PropertyStatus = 'active' | 'pending' | 'archived';
-export type InteractionType = 'view' | 'save' | 'dismiss';
+export type InteractionType = 'view' | 'save';
 export type UserRole = 'renter' | 'owner';
 export type SortField = 'price' | 'createdAt';
 export type SortOrder = 'asc' | 'desc';
@@ -110,7 +110,6 @@ export interface RecommendedProperty {
 export interface PropertyWithStats extends Property {
   viewCount: number;
   saveCount: number;
-  dismissCount: number;
   averageRating: number | null;
   totalReviews: number;
 }

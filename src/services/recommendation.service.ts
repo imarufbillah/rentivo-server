@@ -9,7 +9,6 @@ const SYSTEM_PROMPT = `You are a real estate recommendation assistant. You analy
 User interactions:
 - view: user viewed property details
 - save: user saved property to favorites (strong positive signal)
-- dismiss: user explicitly rejected property (strong negative signal)
 
 Your task: Given a user's interaction history and a list of candidate properties, rank the candidates from most to least relevant based on inferred preferences.
 
@@ -67,17 +66,10 @@ export const buildCandidatePool = async (
   userId: string,
   filters: RecommendationFilters
 ): Promise<Property[]> => {
-  const { properties, interactions } = await getCollections();
-  const userObjectId = new ObjectId(userId);
-
-  const dismissed = await interactions
-    .find({ userId: userObjectId, type: 'dismiss' }, { projection: { propertyId: 1 } })
-    .toArray();
-  const dismissedIds = dismissed.map((d) => d.propertyId);
+  const { properties } = await getCollections();
 
   const filter: Filter<Property> = {
     status: 'active',
-    _id: { $nin: dismissedIds },
   };
 
   if (filters.location) filter.location = filters.location;

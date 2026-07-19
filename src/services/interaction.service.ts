@@ -150,7 +150,7 @@ export const deleteInteraction = async (
 export const getUserInteractionState = async (
   userId: string,
   propertyId: string
-): Promise<{ hasViewed: boolean; hasSaved: boolean; hasDismissed: boolean }> => {
+): Promise<{ hasViewed: boolean; hasSaved: boolean }> => {
   const { interactions } = await getCollections();
   const userObjectId = new ObjectId(userId);
   const propertyObjectId = new ObjectId(propertyId);
@@ -159,7 +159,7 @@ export const getUserInteractionState = async (
     .find({
       userId: userObjectId,
       propertyId: propertyObjectId,
-      type: { $in: ['view', 'save', 'dismiss'] },
+      type: { $in: ['view', 'save'] },
     })
     .project({ type: 1 })
     .toArray();
@@ -167,7 +167,6 @@ export const getUserInteractionState = async (
   return {
     hasViewed: docs.some((d) => d.type === 'view'),
     hasSaved: docs.some((d) => d.type === 'save'),
-    hasDismissed: docs.some((d) => d.type === 'dismiss'),
   };
 };
 
@@ -178,7 +177,7 @@ export const deleteInteractionsByProperty = async (propertyId: string): Promise<
 
 export const getInteractionCountsByOwner = async (
   ownerId: string
-): Promise<Map<string, { views: number; saves: number; dismisses: number }>> => {
+): Promise<Map<string, { views: number; saves: number }>> => {
   const { interactions, properties } = await getCollections();
   const ownerObjectId = new ObjectId(ownerId);
 
@@ -205,11 +204,11 @@ export const getInteractionCountsByOwner = async (
     ])
     .toArray();
 
-  const result = new Map<string, { views: number; saves: number; dismisses: number }>();
+  const result = new Map<string, { views: number; saves: number }>();
 
   for (const prop of ownerProperties) {
     const id = prop._id!.toString();
-    result.set(id, { views: 0, saves: 0, dismisses: 0 });
+    result.set(id, { views: 0, saves: 0 });
   }
 
   for (const item of counts) {
@@ -219,7 +218,6 @@ export const getInteractionCountsByOwner = async (
     if (entry) {
       if (type === 'view') entry.views = item.count;
       else if (type === 'save') entry.saves = item.count;
-      else if (type === 'dismiss') entry.dismisses = item.count;
     }
   }
 

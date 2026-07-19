@@ -17,11 +17,6 @@ describe('createInteractionSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('accepts dismiss type', () => {
-    const result = createInteractionSchema.safeParse({ ...validInteraction, type: 'dismiss' });
-    expect(result.success).toBe(true);
-  });
-
   it('rejects invalid type', () => {
     const result = createInteractionSchema.safeParse({ ...validInteraction, type: 'like' });
     expect(result.success).toBe(false);

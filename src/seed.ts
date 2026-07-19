@@ -223,17 +223,6 @@ const seed = async () => {
       });
     }
 
-    // Dismiss some properties (indices 2, 5, 9)
-    const dismissedIndices = [2, 5, 9];
-    for (const idx of dismissedIndices) {
-      interactions.push({
-        userId: renterId,
-        propertyId: propertyIds[idx],
-        type: 'dismiss',
-        createdAt: new Date(Date.now() - Math.random() * 3 * 24 * 60 * 60 * 1000),
-      });
-    }
-
     await db.collection('interactions').insertMany(interactions);
     console.log(`Created ${interactions.length} interactions for demo renter`);
 
