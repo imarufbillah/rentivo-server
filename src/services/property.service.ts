@@ -120,7 +120,10 @@ export const searchProperties = async (
   const filter: Filter<Property> = { status: 'active' };
 
   if (filters.search) {
-    filter.$text = { $search: filters.search };
+    filter.$or = [
+      { title: { $regex: filters.search, $options: 'i' } },
+      { location: { $regex: filters.search, $options: 'i' } },
+    ];
   }
 
   if (filters.location) {
@@ -258,6 +261,5 @@ export const ensureIndexes = async (): Promise<void> => {
     properties.createIndex({ price: 1 }),
     properties.createIndex({ createdAt: -1 }),
     properties.createIndex({ status: 1 }),
-    properties.createIndex({ title: 'text', location: 'text' }),
   ]);
 };
