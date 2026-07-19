@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import * as recommendationService from '../services/recommendation.service';
 import { PropertyType } from '../types';
+import { logControllerError } from '../lib/logger';
 
 export const getRecommendations = async (req: Request, res: Response) => {
   try {
@@ -13,7 +14,8 @@ export const getRecommendations = async (req: Request, res: Response) => {
 
     const result = await recommendationService.getRecommendations(req.user!.id, filters);
     res.json({ success: true, data: result });
-  } catch {
+  } catch (error) {
+    logControllerError(req, error, 'getRecommendations');
     res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Failed to get recommendations' },

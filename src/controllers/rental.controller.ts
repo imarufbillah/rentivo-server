@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import * as rentalService from '../services/rental.service';
 import { stripe } from '../lib/stripe';
+import { logControllerError } from '../lib/logger';
 
 export const createCheckout = async (req: Request, res: Response) => {
   try {
@@ -15,6 +16,7 @@ export const createCheckout = async (req: Request, res: Response) => {
     const result = await rentalService.createCheckoutSession(propertyId, req.user!.id);
     res.json({ success: true, data: result });
   } catch (error) {
+    logControllerError(req, error, 'createCheckout');
     const message = error instanceof Error ? error.message : 'Failed to create checkout session';
     const status = message.includes('not found')
       ? 404
@@ -45,7 +47,8 @@ export const cancelPending = async (req: Request, res: Response) => {
 
     const result = await rentalService.cancelPendingRental(propertyId, req.user!.id);
     res.json({ success: true, data: result });
-  } catch {
+  } catch (error) {
+    logControllerError(req, error, 'cancelPending');
     res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Failed to cancel rental' },
@@ -65,7 +68,8 @@ export const confirm = async (req: Request, res: Response) => {
 
     const result = await rentalService.confirmRental(sessionId);
     res.json({ success: true, data: result });
-  } catch {
+  } catch (error) {
+    logControllerError(req, error, 'confirmRental');
     res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Failed to confirm rental' },
@@ -88,22 +92,32 @@ export const webhook = async (req: Request, res: Response) => {
 
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
-  } catch {
+  } catch (error) {
+    logControllerError(req, error, 'webhook - signature validation');
     return res.status(400).json({
       success: false,
       error: { code: 'VALIDATION_FAILED', message: 'Invalid webhook signature' },
     });
   }
 
-  const result = await rentalService.handleWebhook(event);
-  res.json({ received: true, processed: result.processed });
+  try {
+    const result = await rentalService.handleWebhook(event);
+    res.json({ received: true, processed: result.processed });
+  } catch (error) {
+    logControllerError(req, error, 'webhook - event handling');
+    res.status(500).json({
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'Failed to process webhook' },
+    });
+  }
 };
 
 export const getMyRentals = async (req: Request, res: Response) => {
   try {
     const rentals = await rentalService.getUserRentals(req.user!.id);
     res.json({ success: true, data: { rentals } });
-  } catch {
+  } catch (error) {
+    logControllerError(req, error, 'getMyRentals');
     res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch rentals' },
@@ -116,7 +130,8 @@ export const getPropertyRentalStatus = async (req: Request, res: Response) => {
     const { id } = req.params;
     const status = await rentalService.getPropertyRentalStatus(id);
     res.json({ success: true, data: status });
-  } catch {
+  } catch (error) {
+    logControllerError(req, error, 'getPropertyRentalStatus');
     res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Failed to check rental status' },

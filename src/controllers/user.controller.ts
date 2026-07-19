@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { getCollections } from '../lib/db/collections';
 import { ObjectId } from 'mongodb';
+import { logControllerError } from '../lib/logger';
 
 export const upgradeToOwner = async (req: Request, res: Response) => {
   try {
@@ -29,7 +30,8 @@ export const upgradeToOwner = async (req: Request, res: Response) => {
     );
 
     res.json({ success: true, data: { user: updated } });
-  } catch {
+  } catch (error) {
+    logControllerError(req, error, 'upgradeToOwner');
     res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Failed to upgrade role' },

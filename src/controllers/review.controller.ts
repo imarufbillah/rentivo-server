@@ -1,11 +1,13 @@
 import { Request, Response } from 'express';
 import * as reviewService from '../services/review.service';
 import { createReviewSchema } from '../lib/validation/review.schemas';
+import { logValidationError, logControllerError } from '../lib/logger';
 
 export const createReview = async (req: Request, res: Response) => {
   try {
     const parsed = createReviewSchema.safeParse(req.body);
     if (!parsed.success) {
+      logValidationError(req, parsed.error, 'createReview');
       return res.status(400).json({
         success: false,
         error: { code: 'VALIDATION_FAILED', message: parsed.error.issues[0].message },
@@ -25,6 +27,7 @@ export const createReview = async (req: Request, res: Response) => {
     const review = await reviewService.createReview(req.user!.id, propertyId, rating, comment);
     res.status(201).json({ success: true, data: { review } });
   } catch (error) {
+    logControllerError(req, error, 'createReview');
     const message = error instanceof Error ? error.message : 'Failed to create review';
     const status = message.includes('already reviewed') ? 409 : 500;
     res.status(status).json({
@@ -44,7 +47,8 @@ export const getReviewsByProperty = async (req: Request, res: Response) => {
     ]);
 
     res.json({ success: true, data: { reviews, averageRating, totalReviews } });
-  } catch {
+  } catch (error) {
+    logControllerError(req, error, 'getReviewsByProperty');
     res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch reviews' },

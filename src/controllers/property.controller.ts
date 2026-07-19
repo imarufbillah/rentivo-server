@@ -5,11 +5,13 @@ import * as reviewService from '../services/review.service';
 import { getCollections } from '../lib/db/collections';
 import { createPropertySchema, updatePropertySchema, propertyFilterSchema } from '../lib/validation/property.schemas';
 import { PropertyWithStats } from '../types';
+import { logValidationError, logControllerError } from '../lib/logger';
 
 export const createProperty = async (req: Request, res: Response) => {
   try {
     const parsed = createPropertySchema.safeParse(req.body);
     if (!parsed.success) {
+      logValidationError(req, parsed.error, 'createProperty');
       return res.status(400).json({
         success: false,
         error: { code: 'VALIDATION_FAILED', message: parsed.error.issues[0].message },
@@ -18,7 +20,8 @@ export const createProperty = async (req: Request, res: Response) => {
 
     const property = await propertyService.createProperty(parsed.data, req.user!.id);
     res.status(201).json({ success: true, data: { property } });
-  } catch {
+  } catch (error) {
+    logControllerError(req, error, 'createProperty');
     res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Failed to create property' },
@@ -30,6 +33,7 @@ export const getProperties = async (req: Request, res: Response) => {
   try {
     const parsed = propertyFilterSchema.safeParse(req.query);
     if (!parsed.success) {
+      logValidationError(req, parsed.error, 'getProperties');
       return res.status(400).json({
         success: false,
         error: { code: 'VALIDATION_FAILED', message: parsed.error.issues[0].message },
@@ -39,7 +43,8 @@ export const getProperties = async (req: Request, res: Response) => {
     const { page, limit, ...filters } = parsed.data;
     const result = await propertyService.searchProperties(filters, { page, limit });
     res.json({ success: true, data: result });
-  } catch {
+  } catch (error) {
+    logControllerError(req, error, 'getProperties');
     res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Failed to search properties' },
@@ -81,7 +86,8 @@ export const getPropertyById = async (req: Request, res: Response) => {
           : null,
       },
     });
-  } catch {
+  } catch (error) {
+    logControllerError(req, error, 'getPropertyById');
     res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch property' },
@@ -94,6 +100,7 @@ export const updateProperty = async (req: Request, res: Response) => {
     const id = req.params.id as string;
     const parsed = updatePropertySchema.safeParse(req.body);
     if (!parsed.success) {
+      logValidationError(req, parsed.error, 'updateProperty');
       return res.status(400).json({
         success: false,
         error: { code: 'VALIDATION_FAILED', message: parsed.error.issues[0].message },
@@ -103,6 +110,7 @@ export const updateProperty = async (req: Request, res: Response) => {
     const property = await propertyService.updateProperty(id, parsed.data, req.user!.id);
     res.json({ success: true, data: { property } });
   } catch (error) {
+    logControllerError(req, error, 'updateProperty');
     const message = error instanceof Error ? error.message : 'Failed to update property';
     const status = message.includes('not found') ? 404 : 500;
     res.status(status).json({
@@ -118,6 +126,7 @@ export const deleteProperty = async (req: Request, res: Response) => {
     await propertyService.deleteProperty(id, req.user!.id);
     res.json({ success: true });
   } catch (error) {
+    logControllerError(req, error, 'deleteProperty');
     const message = error instanceof Error ? error.message : 'Failed to delete property';
     const status = message.includes('not found') ? 404 : 500;
     res.status(status).json({
@@ -151,7 +160,8 @@ export const getMyProperties = async (req: Request, res: Response) => {
     });
 
     res.json({ success: true, data: { properties: propertiesWithStats } });
-  } catch {
+  } catch (error) {
+    logControllerError(req, error, 'getMyProperties');
     res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch properties' },
@@ -163,7 +173,8 @@ export const getAllAmenities = async (req: Request, res: Response) => {
   try {
     const amenities = await propertyService.getAllAmenities();
     res.json({ success: true, data: { amenities } });
-  } catch {
+  } catch (error) {
+    logControllerError(req, error, 'getAllAmenities');
     res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch amenities' },

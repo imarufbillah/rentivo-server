@@ -1,11 +1,13 @@
 import { Request, Response } from 'express';
 import * as interactionService from '../services/interaction.service';
 import { createInteractionSchema, getInteractionHistorySchema, deleteInteractionSchema, propertyIdParamSchema } from '../lib/validation/interaction.schemas';
+import { logValidationError, logControllerError } from '../lib/logger';
 
 export const trackInteraction = async (req: Request, res: Response) => {
   try {
     const parsed = createInteractionSchema.safeParse(req.body);
     if (!parsed.success) {
+      logValidationError(req, parsed.error, 'trackInteraction');
       return res.status(400).json({
         success: false,
         error: { code: 'VALIDATION_FAILED', message: parsed.error.issues[0].message },
@@ -18,7 +20,8 @@ export const trackInteraction = async (req: Request, res: Response) => {
       parsed.data.type
     );
     res.status(201).json({ success: true, data: { interaction } });
-  } catch {
+  } catch (error) {
+    logControllerError(req, error, 'trackInteraction');
     res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Failed to track interaction' },
@@ -30,6 +33,7 @@ export const getInteractionHistory = async (req: Request, res: Response) => {
   try {
     const parsed = getInteractionHistorySchema.safeParse(req.query);
     if (!parsed.success) {
+      logValidationError(req, parsed.error, 'getInteractionHistory');
       return res.status(400).json({
         success: false,
         error: { code: 'VALIDATION_FAILED', message: parsed.error.issues[0].message },
@@ -53,7 +57,8 @@ export const getInteractionHistory = async (req: Request, res: Response) => {
         pagination: { page, limit, total: result.total, totalPages },
       },
     });
-  } catch {
+  } catch (error) {
+    logControllerError(req, error, 'getInteractionHistory');
     res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch interaction history' },
@@ -65,6 +70,7 @@ export const deleteInteraction = async (req: Request, res: Response) => {
   try {
     const parsed = deleteInteractionSchema.safeParse(req.body);
     if (!parsed.success) {
+      logValidationError(req, parsed.error, 'deleteInteraction');
       return res.status(400).json({
         success: false,
         error: { code: 'VALIDATION_FAILED', message: parsed.error.issues[0].message },
@@ -78,7 +84,8 @@ export const deleteInteraction = async (req: Request, res: Response) => {
     );
 
     res.json({ success: true });
-  } catch {
+  } catch (error) {
+    logControllerError(req, error, 'deleteInteraction');
     res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Failed to delete interaction' },
@@ -90,6 +97,7 @@ export const getUserInteractionState = async (req: Request, res: Response) => {
   try {
     const parsed = propertyIdParamSchema.safeParse(req.params);
     if (!parsed.success) {
+      logValidationError(req, parsed.error, 'getUserInteractionState');
       return res.status(400).json({
         success: false,
         error: { code: 'VALIDATION_FAILED', message: parsed.error.issues[0].message },
@@ -102,7 +110,8 @@ export const getUserInteractionState = async (req: Request, res: Response) => {
     );
 
     res.json({ success: true, data: state });
-  } catch {
+  } catch (error) {
+    logControllerError(req, error, 'getUserInteractionState');
     res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch interaction state' },
@@ -114,7 +123,8 @@ export const getSavedProperties = async (req: Request, res: Response) => {
   try {
     const properties = await interactionService.getUserSavedProperties(req.user!.id);
     res.json({ success: true, data: { properties } });
-  } catch {
+  } catch (error) {
+    logControllerError(req, error, 'getSavedProperties');
     res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch saved properties' },

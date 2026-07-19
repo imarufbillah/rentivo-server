@@ -1,11 +1,13 @@
 import { Request, Response } from 'express';
 import * as chatService from '../services/chat.service';
 import { chatMessageSchema, chatSuggestionsSchema } from '../lib/validation/chat.schemas';
+import { logValidationError, logControllerError } from '../lib/logger';
 
 export const sendMessage = async (req: Request, res: Response) => {
   try {
     const parsed = chatMessageSchema.safeParse(req.body);
     if (!parsed.success) {
+      logValidationError(req, parsed.error, 'sendMessage');
       return res.status(400).json({
         success: false,
         error: { code: 'VALIDATION_FAILED', message: parsed.error.issues[0].message },
@@ -28,15 +30,7 @@ export const sendMessage = async (req: Request, res: Response) => {
 
     res.end();
   } catch (error) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.error('\n❌ Chat error caught:');
-      console.error('User:', req.user?.email);
-      console.error('Error:', error instanceof Error ? error.message : 'Unknown error');
-      if (error instanceof Error && error.stack) {
-        console.error('Stack:', error.stack);
-      }
-      console.error('---\n');
-    }
+    logControllerError(req, error, 'sendMessage');
 
     if (res.headersSent) {
       res.write(`data: ${JSON.stringify({ type: 'error', message: 'An error occurred while processing your message.' })}\n\n`);
@@ -72,6 +66,7 @@ export const getSuggestions = async (req: Request, res: Response) => {
   try {
     const parsed = chatSuggestionsSchema.safeParse(req.body);
     if (!parsed.success) {
+      logValidationError(req, parsed.error, 'getSuggestions');
       return res.status(400).json({
         success: false,
         error: { code: 'VALIDATION_FAILED', message: parsed.error.issues[0].message },
@@ -81,17 +76,7 @@ export const getSuggestions = async (req: Request, res: Response) => {
     const suggestions = await chatService.generateFollowUpSuggestions(parsed.data.conversationHistory);
     res.json({ success: true, data: { suggestions } });
   } catch (error) {
-    // Log error details in development
-    if (process.env.NODE_ENV !== 'production') {
-      console.error('\n❌ Chat suggestions error:');
-      console.error('User:', req.user?.email);
-      console.error('Error:', error instanceof Error ? error.message : 'Unknown error');
-      if (error instanceof Error && error.stack) {
-        console.error('Stack:', error.stack);
-      }
-      console.error('---\n');
-    }
-
+    logControllerError(req, error, 'getSuggestions');
     res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Failed to generate suggestions' },
