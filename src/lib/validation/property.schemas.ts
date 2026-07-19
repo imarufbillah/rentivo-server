@@ -13,6 +13,7 @@ const amenityString = z.string().min(1).max(30).transform((s) => s.trim().toLowe
 
 export const createPropertySchema = z.object({
   title: z.string().min(5).max(200),
+  shortDescription: z.string().max(200).optional(),
   description: z.string().min(20).max(2000),
   price: z.number().positive(),
   location: z.string().min(2).max(200),

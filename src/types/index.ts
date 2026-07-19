@@ -32,6 +32,7 @@ export interface User {
 export interface Property {
   _id?: ObjectId;
   title: string;
+  shortDescription?: string;
   description: string;
   price: number;
   location: string;

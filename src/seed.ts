@@ -10,6 +10,7 @@ const SALT_ROUNDS = 10;
 const demoProperties = [
   {
     title: 'Sunlit Studio in Williamsburg',
+    shortDescription: 'Bright studio with exposed brick in the heart of Williamsburg.',
     description: 'Bright and airy studio apartment in the heart of Williamsburg. Features exposed brick walls, hardwood floors, and floor-to-ceiling windows. Walking distance to L train, cafes, and boutiques. Perfect for young professionals who love the Brooklyn vibe.',
     price: 2200,
     location: 'Brooklyn, NY',
@@ -43,6 +44,7 @@ const demoProperties = [
   },
   {
     title: 'Modern 2BR Apartment with Manhattan Views',
+    shortDescription: 'Stunning two-bedroom with panoramic Manhattan skyline views.',
     description: 'Stunning two-bedroom apartment with panoramic Manhattan skyline views. Floor-to-ceiling windows flood the space with natural light. Updated kitchen with granite countertops and stainless steel appliances. Building amenities include rooftop deck, gym, and 24/7 doorman.',
     price: 3800,
     location: 'Manhattan, NY',
@@ -76,6 +78,7 @@ const demoProperties = [
   },
   {
     title: 'Cozy Room in Shared Brownstone',
+    shortDescription: 'Private room in a charming Brooklyn brownstone.',
     description: 'Private room in a charming Brooklyn brownstone. Shared kitchen and living areas with friendly roommates. Quiet tree-lined street, close to Prospect Park. Includes all utilities and high-speed WiFi. Great for students or remote workers.',
     price: 1100,
     location: 'Brooklyn, NY',
@@ -109,6 +112,7 @@ const demoProperties = [
   },
   {
     title: 'Luxury Villa with Private Garden',
+    shortDescription: 'Exclusive four-bedroom villa with a private garden and patio.',
     description: 'Exclusive four-bedroom villa in Riverdale with a private garden and patio. Spacious open-plan living, chef\'s kitchen, and home office. Two-car garage, washer/dryer, and central air. Perfect for families seeking suburban tranquility within city limits.',
     price: 6500,
     location: 'Riverdale, NY',
@@ -142,6 +146,7 @@ const demoProperties = [
   },
   {
     title: 'Charming House near Central Park',
+    shortDescription: 'Charming townhouse steps from Central Park.',
     description: 'Beautiful three-story townhouse steps from Central Park. Original details meet modern updates — crown molding, fireplace, renovated bathrooms. Private backyard with mature trees. Ideal for those who want park access without leaving the city.',
     price: 5200,
     location: 'Manhattan, NY',
@@ -175,6 +180,7 @@ const demoProperties = [
   },
   {
     title: 'Affordable Apartment in Astoria',
+    shortDescription: 'Bright and affordable apartment in vibrant Astoria.',
     description: 'Well-maintained one-bedroom apartment in vibrant Astoria. Near N/W trains, diverse restaurants, and Astoria Park. Features updated kitchen, good closet space, and laundry in building. Heat and hot water included in rent.',
     price: 1800,
     location: 'Queens, NY',
@@ -208,6 +214,7 @@ const demoProperties = [
   },
   {
     title: 'Penthouse Loft in SoHo',
+    shortDescription: 'Stunning penthouse loft with panoramic city views.',
     description: 'Spectacular penthouse loft with 14-foot ceilings and skylights in prime SoHo. Open floor plan with chef\'s kitchen, spa-like bathroom, and private terrace with city views. Building has elevator, bike storage, and roof access.',
     price: 8500,
     location: 'Manhattan, NY',
@@ -241,6 +248,7 @@ const demoProperties = [
   },
   {
     title: 'Quiet Studio near Columbia University',
+    shortDescription: 'Peaceful studio perfect for students and academics.',
     description: 'Compact but efficient studio apartment near Columbia University campus. Perfect for graduate students or faculty. Recently renovated with new appliances. Close to M4 bus, 1 train, and Riverside Park.',
     price: 1650,
     location: 'Manhattan, NY',
@@ -274,6 +282,7 @@ const demoProperties = [
   },
   {
     title: 'Spacious 3BR in Park Slope',
+    shortDescription: 'Family-friendly three-bedroom in coveted Park Slope.',
     description: 'Generous three-bedroom apartment on a beautiful tree-lined block in Park Slope. Original hardwood floors, eat-in kitchen, and large living room. Walking distance to Prospect Park, the farmers market, and top-rated schools.',
     price: 4200,
     location: 'Brooklyn, NY',
@@ -307,6 +316,7 @@ const demoProperties = [
   },
   {
     title: 'Bright Room in Harlem Brownstone',
+    shortDescription: 'Sunny room in a historic Harlem brownstone.',
     description: 'Sunny room available in a shared brownstone in Harlem. Full bathroom, shared kitchen with all essentials, and access to a lovely garden. Close to A/B/C/D trains, Sylvia\'s, and the Apollo Theater. Diverse and welcoming neighborhood.',
     price: 950,
     location: 'Manhattan, NY',
@@ -340,6 +350,7 @@ const demoProperties = [
   },
   {
     title: 'Waterfront Condo in Long Island City',
+    shortDescription: 'Modern waterfront condo with stunning East River views.',
     description: 'Modern waterfront condominium with stunning East River views. Floor-to-ceiling windows, in-unit washer/dryer, and gourmet kitchen. Building amenities include pool, fitness center, concierge, and parking garage.',
     price: 3400,
     location: 'Queens, NY',
@@ -373,6 +384,7 @@ const demoProperties = [
   },
   {
     title: 'Renovated House in Staten Island',
+    shortDescription: 'Fully renovated house with private backyard.',
     description: 'Fully renovated four-bedroom colonial in a quiet Staten Island neighborhood. New kitchen, bathrooms, and roof. Large backyard with deck, perfect for entertaining. Two-car driveway, finished basement, and central air conditioning.',
     price: 3200,
     location: 'Staten Island, NY',
@@ -406,6 +418,7 @@ const demoProperties = [
   },
   {
     title: 'Luxury Penthouse with Panoramic City Views',
+    shortDescription: 'Breathtaking penthouse with 360-degree city views.',
     description: 'Experience unparalleled luxury in this stunning penthouse apartment perched on the top floor of a premier building in the Upper East Side. Floor-to-ceiling windows wrap around the entire residence, offering breathtaking 360-degree views of Central Park, the Manhattan skyline, and the East River. The open-concept living space features imported Italian marble floors, a gourmet chef\'s kitchen with Sub-Zero and Wolf appliances, and a private terrace perfect for al fresco dining. The primary suite includes a spa-like bathroom with heated floors, a soaking tub, and a walk-in closet. Additional highlights include a home office, wine cellar, and smart home automation throughout.',
     price: 12500,
     location: 'Manhattan, NY',
