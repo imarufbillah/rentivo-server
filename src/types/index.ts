@@ -199,3 +199,13 @@ export interface Rental {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface RentalWithProperty extends Rental {
+  property: {
+    _id: ObjectId;
+    title: string;
+    images: string[];
+    location: string;
+    price: number;
+  } | null;
+}

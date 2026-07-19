@@ -191,11 +191,34 @@ export const getPropertyRentalStatus = async (
   return { isRented: !!rental, rental };
 };
 
-export const getUserRentals = async (userId: string): Promise<Rental[]> => {
+export const getUserRentals = async (userId: string): Promise<import('../types').RentalWithProperty[]> => {
   const { rentals } = await getCollections();
   return rentals
-    .find({ renterId: new ObjectId(userId) })
-    .sort({ createdAt: -1 })
+    .aggregate([
+      { $match: { renterId: new ObjectId(userId) } },
+      { $sort: { createdAt: -1 } },
+      {
+        $lookup: {
+          from: 'properties',
+          localField: 'propertyId',
+          foreignField: '_id',
+          as: 'propertyDocs',
+        },
+      },
+      {
+        $addFields: {
+          property: { $arrayElemAt: ['$propertyDocs', 0] },
+        },
+      },
+      {
+        $project: {
+          propertyDocs: 0,
+          'property.description': 0,
+          'property.ownerId': 0,
+          'property.updatedAt': 0,
+        },
+      },
+    ])
     .toArray();
 };
 
