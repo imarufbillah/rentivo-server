@@ -6,6 +6,12 @@ export type InteractionType = 'view' | 'save';
 export type UserRole = 'renter' | 'owner';
 export type SortField = 'price' | 'createdAt' | 'bedrooms';
 export type SortOrder = 'asc' | 'desc';
+export type FurnishingStatus = 'furnished' | 'semi-furnished' | 'unfurnished';
+export type PropertyCondition = 'new' | 'excellent' | 'good' | 'fair';
+export type ParkingStatus = 'included' | 'available' | 'none';
+export type PetPolicy = 'allowed' | 'not-allowed' | 'case-by-case';
+export type SmokingPolicy = 'allowed' | 'not-allowed';
+export type RentFrequency = 'monthly' | 'weekly' | 'daily';
 
 export interface User {
   _id?: ObjectId;
@@ -14,6 +20,9 @@ export interface User {
   role: UserRole;
   name?: string;
   avatar?: string;
+  bio?: string;
+  phone?: string;
+  isVerified?: boolean;
   oauthProvider?: 'google';
   oauthId?: string;
   createdAt: Date;
@@ -33,6 +42,28 @@ export interface Property {
   bedrooms: number;
   bathrooms: number;
   amenities: string[];
+  size?: number;
+  balconies?: number;
+  floor?: number;
+  totalFloors?: number;
+  furnishing?: FurnishingStatus;
+  condition?: PropertyCondition;
+  utilities?: string[];
+  parking?: ParkingStatus;
+  internet?: boolean;
+  securityDeposit?: number;
+  advancePayment?: number;
+  leaseDuration?: number;
+  minStay?: number;
+  rentFrequency?: RentFrequency;
+  petPolicy?: PetPolicy;
+  smokingPolicy?: SmokingPolicy;
+  houseRules?: string;
+  rentalTerms?: string;
+  fullAddress?: string;
+  lat?: number;
+  lng?: number;
+  availableFrom?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -71,6 +102,28 @@ export interface CreatePropertyDTO {
   bedrooms?: number;
   bathrooms?: number;
   amenities?: string[];
+  size?: number;
+  balconies?: number;
+  floor?: number;
+  totalFloors?: number;
+  furnishing?: FurnishingStatus;
+  condition?: PropertyCondition;
+  utilities?: string[];
+  parking?: ParkingStatus;
+  internet?: boolean;
+  securityDeposit?: number;
+  advancePayment?: number;
+  leaseDuration?: number;
+  minStay?: number;
+  rentFrequency?: RentFrequency;
+  petPolicy?: PetPolicy;
+  smokingPolicy?: SmokingPolicy;
+  houseRules?: string;
+  rentalTerms?: string;
+  fullAddress?: string;
+  lat?: number;
+  lng?: number;
+  availableFrom?: Date;
 }
 
 export type UpdatePropertyDTO = Partial<CreatePropertyDTO>;

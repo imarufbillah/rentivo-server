@@ -2,6 +2,12 @@ import { z } from 'zod';
 
 export const propertyTypeEnum = z.enum(['apartment', 'house', 'room', 'studio', 'villa']);
 export const propertyStatusEnum = z.enum(['active', 'pending', 'archived']);
+export const furnishingEnum = z.enum(['furnished', 'semi-furnished', 'unfurnished']);
+export const conditionEnum = z.enum(['new', 'excellent', 'good', 'fair']);
+export const parkingEnum = z.enum(['included', 'available', 'none']);
+export const petPolicyEnum = z.enum(['allowed', 'not-allowed', 'case-by-case']);
+export const smokingPolicyEnum = z.enum(['allowed', 'not-allowed']);
+export const rentFrequencyEnum = z.enum(['monthly', 'weekly', 'daily']);
 
 const amenityString = z.string().min(1).max(30).transform((s) => s.trim().toLowerCase());
 
@@ -16,6 +22,28 @@ export const createPropertySchema = z.object({
   bedrooms: z.number().int().min(0).max(20).optional().default(1),
   bathrooms: z.number().int().min(0).max(20).optional().default(1),
   amenities: z.array(amenityString).optional().default([]),
+  size: z.number().positive().optional(),
+  balconies: z.number().int().nonnegative().optional(),
+  floor: z.number().int().nonnegative().optional(),
+  totalFloors: z.number().int().positive().optional(),
+  furnishing: furnishingEnum.optional(),
+  condition: conditionEnum.optional(),
+  utilities: z.array(z.string().max(30)).optional(),
+  parking: parkingEnum.optional(),
+  internet: z.boolean().optional(),
+  securityDeposit: z.number().nonnegative().optional(),
+  advancePayment: z.number().nonnegative().optional(),
+  leaseDuration: z.number().int().positive().optional(),
+  minStay: z.number().int().positive().optional(),
+  rentFrequency: rentFrequencyEnum.optional(),
+  petPolicy: petPolicyEnum.optional(),
+  smokingPolicy: smokingPolicyEnum.optional(),
+  houseRules: z.string().max(2000).optional(),
+  rentalTerms: z.string().max(2000).optional(),
+  fullAddress: z.string().max(500).optional(),
+  lat: z.number().min(-90).max(90).optional(),
+  lng: z.number().min(-180).max(180).optional(),
+  availableFrom: z.coerce.date().optional(),
 });
 
 export const updatePropertySchema = createPropertySchema.partial();

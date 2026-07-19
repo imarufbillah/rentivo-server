@@ -2,6 +2,7 @@ import { ObjectId, Filter } from 'mongodb';
 import { getCollections } from '../lib/db/collections';
 import {
   Property,
+  PropertyWithStats,
   CreatePropertyDTO,
   UpdatePropertyDTO,
   PropertyFilters,
@@ -47,6 +48,33 @@ export const createProperty = async (
 export const getPropertyById = async (id: string): Promise<Property | null> => {
   const { properties } = await getCollections();
   return properties.findOne({ _id: ensureObjectId(id) });
+};
+
+export const getPropertyWithStats = async (id: string): Promise<PropertyWithStats | null> => {
+  const { properties, interactions, reviews } = await getCollections();
+  const objectId = ensureObjectId(id);
+
+  const property = await properties.findOne({ _id: objectId });
+  if (!property) return null;
+
+  const [viewCount, saveCount, reviewDocs] = await Promise.all([
+    interactions.countDocuments({ propertyId: objectId, type: 'view' }),
+    interactions.countDocuments({ propertyId: objectId, type: 'save' }),
+    reviews.find({ propertyId: objectId }).toArray(),
+  ]);
+
+  const totalReviews = reviewDocs.length;
+  const averageRating = totalReviews > 0
+    ? reviewDocs.reduce((sum, r) => sum + (r.rating || 0), 0) / totalReviews
+    : null;
+
+  return {
+    ...property,
+    viewCount,
+    saveCount,
+    averageRating,
+    totalReviews,
+  };
 };
 
 export const updateProperty = async (

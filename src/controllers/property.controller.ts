@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import * as propertyService from '../services/property.service';
 import * as interactionService from '../services/interaction.service';
 import * as reviewService from '../services/review.service';
+import { getCollections } from '../lib/db/collections';
 import { createPropertySchema, updatePropertySchema, propertyFilterSchema } from '../lib/validation/property.schemas';
 import { PropertyWithStats } from '../types';
 
@@ -49,15 +50,37 @@ export const getProperties = async (req: Request, res: Response) => {
 export const getPropertyById = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
-    const property = await propertyService.getPropertyById(id);
-    if (!property) {
+    const propertyWithStats = await propertyService.getPropertyWithStats(id);
+    if (!propertyWithStats) {
       return res.status(404).json({
         success: false,
         error: { code: 'RESOURCE_NOT_FOUND', message: 'Property not found' },
       });
     }
 
-    res.json({ success: true, data: { property } });
+    const { users } = await getCollections();
+    const owner = await users.findOne(
+      { _id: propertyWithStats.ownerId },
+      { projection: { passwordHash: 0 } }
+    );
+
+    res.json({
+      success: true,
+      data: {
+        property: propertyWithStats,
+        owner: owner
+          ? {
+              _id: owner._id,
+              name: owner.name,
+              avatar: owner.avatar,
+              bio: owner.bio,
+              phone: owner.phone,
+              isVerified: owner.isVerified,
+              createdAt: owner.createdAt,
+            }
+          : null,
+      },
+    });
   } catch {
     res.status(500).json({
       success: false,
