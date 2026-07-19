@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongodb';
 
 export type PropertyType = 'apartment' | 'house' | 'room' | 'studio' | 'villa';
-export type PropertyStatus = 'active' | 'pending' | 'archived';
+export type PropertyStatus = 'active' | 'pending' | 'archived' | 'rented';
 export type InteractionType = 'view' | 'save';
 export type UserRole = 'renter' | 'owner';
 export type SortField = 'price' | 'createdAt' | 'bedrooms';
@@ -177,4 +177,25 @@ export interface PropertyWithStats extends Property {
   saveCount: number;
   averageRating: number | null;
   totalReviews: number;
+}
+
+export type RentalStatus = 'pending' | 'active' | 'completed' | 'cancelled';
+
+export interface Rental {
+  _id?: ObjectId;
+  propertyId: ObjectId;
+  renterId: ObjectId;
+  ownerId: ObjectId;
+  status: RentalStatus;
+  monthlyRent: number;
+  securityDeposit: number;
+  advancePayment: number;
+  totalPaid: number;
+  stripeSessionId?: string;
+  stripePaymentIntentId?: string;
+  leaseDuration: number;
+  startDate: Date;
+  endDate: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }

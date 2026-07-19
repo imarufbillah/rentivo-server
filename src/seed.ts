@@ -479,6 +479,7 @@ const seed = async () => {
     await db.collection('properties').deleteMany({});
     await db.collection('interactions').deleteMany({});
     await db.collection('reviews').deleteMany({});
+    await db.collection('rentals').deleteMany({});
     await db.collection('session').deleteMany({});
     console.log('Cleared existing data');
 

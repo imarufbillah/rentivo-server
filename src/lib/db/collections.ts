@@ -1,6 +1,6 @@
 import clientPromise from './mongodb';
 import { Db, Collection } from 'mongodb';
-import { User, Property, Interaction, Review } from '../../types/index';
+import { User, Property, Interaction, Review, Rental } from '../../types/index';
 
 let cachedDb: Db | null = null;
 
@@ -20,6 +20,7 @@ export interface Collections {
   properties: Collection<Property>;
   interactions: Collection<Interaction>;
   reviews: Collection<Review>;
+  rentals: Collection<Rental>;
 }
 
 // Type-safe collection accessors
@@ -31,5 +32,6 @@ export const getCollections = async (): Promise<Collections> => {
     properties: db.collection<Property>('properties'),
     interactions: db.collection<Interaction>('interactions'),
     reviews: db.collection<Review>('reviews'),
+    rentals: db.collection<Rental>('rentals'),
   };
 };

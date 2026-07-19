@@ -9,9 +9,11 @@ import reviewRoutes from './routes/review.routes';
 import recommendationRoutes from './routes/recommendation.routes';
 import chatRoutes from './routes/chat.routes';
 import userRoutes from './routes/user.routes';
+import rentalRoutes from './routes/rental.routes';
 import { ensureIndexes as ensurePropertyIndexes } from './services/property.service';
 import { ensureIndexes as ensureInteractionIndexes } from './services/interaction.service';
 import { ensureIndexes as ensureReviewIndexes } from './services/review.service';
+import { ensureRentalIndexes } from './services/rental.service';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -59,12 +61,16 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
+// Stripe webhook needs raw body — register BEFORE express.json()
+app.use('/api/rentals/webhook', express.raw({ type: 'application/json' }));
+
 app.use('/api/properties', propertyRoutes);
 app.use('/api/interactions', interactionRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/rentals', rentalRoutes);
 
 app.use(errorHandler);
 
@@ -77,6 +83,7 @@ const startServer = async () => {
       ensurePropertyIndexes(),
       ensureInteractionIndexes(),
       ensureReviewIndexes(),
+      ensureRentalIndexes(),
     ]);
     console.log('Database indexes ensured');
 
