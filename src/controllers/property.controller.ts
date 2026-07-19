@@ -158,3 +158,15 @@ export const getMyProperties = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getAllAmenities = async (req: Request, res: Response) => {
+  try {
+    const amenities = await propertyService.getAllAmenities();
+    res.json({ success: true, data: { amenities } });
+  } catch {
+    res.status(500).json({
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch amenities' },
+    });
+  }
+};

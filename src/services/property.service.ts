@@ -279,6 +279,17 @@ export const searchProperties = async (
   };
 };
 
+export const getAllAmenities = async (): Promise<string[]> => {
+  const { properties } = await getCollections();
+  const result = await properties.aggregate([
+    { $match: { status: 'active' } },
+    { $unwind: '$amenities' },
+    { $group: { _id: { $toLower: '$amenities' } } },
+    { $sort: { _id: 1 } },
+  ]).toArray();
+  return result.map((r) => r._id);
+};
+
 export const ensureIndexes = async (): Promise<void> => {
   const { properties } = await getCollections();
 

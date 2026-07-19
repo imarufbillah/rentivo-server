@@ -6,6 +6,7 @@ const router = Router();
 
 router.post('/', authenticate, requireOwner, propertyController.createProperty);
 router.get('/my-properties', authenticate, requireOwner, propertyController.getMyProperties);
+router.get('/amenities', propertyController.getAllAmenities);
 router.get('/', propertyController.getProperties);
 router.get('/:id', propertyController.getPropertyById);
 router.patch('/:id', authenticate, requireOwner, propertyController.updateProperty);
