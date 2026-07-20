@@ -4,7 +4,7 @@ export type PropertyType = 'apartment' | 'house' | 'room' | 'studio' | 'villa';
 export type PropertyStatus = 'active' | 'pending' | 'archived' | 'rented';
 export type InteractionType = 'view' | 'save';
 export type UserRole = 'renter' | 'owner';
-export type SortField = 'price' | 'createdAt' | 'bedrooms';
+export type SortField = 'price' | 'createdAt' | 'bedrooms' | 'averageRating';
 export type SortOrder = 'asc' | 'desc';
 export type FurnishingStatus = 'furnished' | 'semi-furnished' | 'unfurnished';
 export type PropertyCondition = 'new' | 'excellent' | 'good' | 'fair';
@@ -19,6 +19,7 @@ export interface User {
   passwordHash?: string;
   role: UserRole;
   name?: string;
+  image?: string;
   avatar?: string;
   bio?: string;
   phone?: string;
