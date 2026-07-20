@@ -64,7 +64,7 @@ export const propertyFilterSchema = z.object({
     return raw.map((s) => s.trim().toLowerCase()).filter(Boolean);
   }).optional(),
   minRating: z.coerce.number().min(1).max(5).optional(),
-  sortBy: z.enum(['price', 'createdAt', 'bedrooms']).optional(),
+  sortBy: z.enum(['price', 'createdAt', 'bedrooms', 'averageRating']).optional(),
   sortOrder: z.enum(['asc', 'desc']).optional(),
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().positive().max(50).optional().default(12),
