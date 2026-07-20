@@ -2,7 +2,7 @@ import { MongoClient, ObjectId, ServerApiVersion } from 'mongodb';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 
-dotenv.config({ path: '.env.local' });
+dotenv.config({ path: '.env' });
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/rentivo';
 const SALT_ROUNDS = 10;
