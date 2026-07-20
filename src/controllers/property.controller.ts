@@ -77,7 +77,7 @@ export const getPropertyById = async (req: Request, res: Response) => {
           ? {
               _id: owner._id,
               name: owner.name,
-              avatar: owner.avatar,
+              avatar: owner.image || owner.avatar,
               bio: owner.bio,
               phone: owner.phone,
               isVerified: owner.isVerified,

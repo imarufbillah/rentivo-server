@@ -9,7 +9,7 @@ router.get('/', async (_req: Request, res: Response) => {
 
     const [propertyCount, userCount, reviewAgg] = await Promise.all([
       db.collection('property').countDocuments({ status: 'active' }),
-      db.collection('user').countDocuments(),
+      db.collection('user').countDocuments({ role: 'renter' }),
       db.collection('review').aggregate([
         { $group: { _id: null, avgRating: { $avg: '$rating' }, count: { $sum: 1 } } }
       ]).toArray(),

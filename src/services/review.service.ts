@@ -171,7 +171,7 @@ export const getRecentReviews = async (limit: number = 6) => {
       userId: review.userId.toString(),
       propertyId: review.propertyId.toString(),
       userName: user?.name || 'Anonymous',
-      userAvatar: user?.avatar,
+      userAvatar: user?.image || user?.avatar,
       propertyTitle: property?.title || 'Property',
       propertyLocation: property?.location || '',
     };
