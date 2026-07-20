@@ -142,6 +142,42 @@ export const checkUserCanReview = async (
   return rental !== null;
 };
 
+export const getRecentReviews = async (limit: number = 6) => {
+  const { reviews, users, properties } = await getCollections();
+
+  const recentReviews = await reviews
+    .find()
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .toArray();
+
+  const userIds = [...new Set(recentReviews.map((r) => r.userId))];
+  const propertyIds = [...new Set(recentReviews.map((r) => r.propertyId))];
+
+  const [usersData, propertiesData] = await Promise.all([
+    users.find({ _id: { $in: userIds } }).project({ _id: 1, name: 1, avatar: 1 }).toArray(),
+    properties.find({ _id: { $in: propertyIds } }).project({ _id: 1, title: 1, location: 1 }).toArray(),
+  ]);
+
+  const userMap = new Map(usersData.map((u) => [u._id.toString(), u]));
+  const propertyMap = new Map(propertiesData.map((p) => [p._id.toString(), p]));
+
+  return recentReviews.map((review) => {
+    const user = userMap.get(review.userId.toString());
+    const property = propertyMap.get(review.propertyId.toString());
+    return {
+      ...review,
+      _id: review._id?.toString(),
+      userId: review.userId.toString(),
+      propertyId: review.propertyId.toString(),
+      userName: user?.name || 'Anonymous',
+      userAvatar: user?.avatar,
+      propertyTitle: property?.title || 'Property',
+      propertyLocation: property?.location || '',
+    };
+  });
+};
+
 export const ensureIndexes = async (): Promise<void> => {
   const { reviews } = await getCollections();
 

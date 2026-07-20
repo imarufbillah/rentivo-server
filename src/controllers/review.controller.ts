@@ -55,3 +55,17 @@ export const getReviewsByProperty = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getRecentReviews = async (req: Request, res: Response) => {
+  try {
+    const limit = Math.min(Number(req.query.limit) || 6, 20);
+    const reviews = await reviewService.getRecentReviews(limit);
+    res.json({ success: true, data: { reviews } });
+  } catch (error) {
+    logControllerError(req, error, 'getRecentReviews');
+    res.status(500).json({
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch recent reviews' },
+    });
+  }
+};

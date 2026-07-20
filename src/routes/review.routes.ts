@@ -5,6 +5,7 @@ import * as reviewController from '../controllers/review.controller.js';
 const router = Router();
 
 router.post('/', authenticate, reviewController.createReview);
+router.get('/recent', reviewController.getRecentReviews);
 router.get('/property/:propertyId', reviewController.getReviewsByProperty);
 
 export default router;
