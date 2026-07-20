@@ -10,6 +10,7 @@ import recommendationRoutes from './routes/recommendation.routes.js';
 import chatRoutes from './routes/chat.routes.js';
 import userRoutes from './routes/user.routes.js';
 import rentalRoutes from './routes/rental.routes.js';
+import statsRoutes from './routes/stats.routes.js';
 import { ensureIndexes as ensurePropertyIndexes } from './services/property.service.js';
 import { ensureIndexes as ensureInteractionIndexes } from './services/interaction.service.js';
 import { ensureIndexes as ensureReviewIndexes } from './services/review.service.js';
@@ -71,6 +72,7 @@ app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/rentals', rentalRoutes);
+app.use('/api/stats', statsRoutes);
 
 app.use(errorHandler);
 
