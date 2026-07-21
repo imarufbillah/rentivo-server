@@ -72,33 +72,23 @@ const streamToString = async function* (
   debug('streamToString: stream created, iterating chunks');
 
   let fullContent = '';
-  let yieldedLength = 0;
 
   for await (const chunk of stream) {
     const text = chunk.text;
     if (text) {
       fullContent += text;
-
-      // Check if we're inside an open <tool_call> block (tag opened but not closed)
-      const lastOpen = fullContent.lastIndexOf('<tool_call>');
-      const lastClose = fullContent.lastIndexOf('</tool_call>');
-      const insideToolCall = lastOpen > lastClose;
-
-      if (insideToolCall) {
-        // Suppress tool call content — yield only text before the <tool_call>
-        continue;
-      }
-
-      // Yield only the new non-tool-call content
-      if (fullContent.length > yieldedLength) {
-        const newContent = fullContent.substring(yieldedLength);
-        yieldedLength = fullContent.length;
-        yield JSON.stringify({ type: 'token', content: newContent });
-      }
     }
   }
 
-  debug('streamToString: done, fullContent length', { length: fullContent.length });
+  // Strip tool call blocks — never yield them to the client
+  const cleanContent = fullContent.replace(/<tool_call>[\s\S]*?<\/tool_call>/g, '').trim();
+
+  debug('streamToString: done', { fullLength: fullContent.length, cleanLength: cleanContent.length });
+
+  if (cleanContent) {
+    yield JSON.stringify({ type: 'token', content: cleanContent });
+  }
+
   return fullContent;
 };
 
