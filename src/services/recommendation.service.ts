@@ -3,6 +3,8 @@ import { GoogleGenAI } from '@google/genai';
 import { getCollections } from '../lib/db/collections.js';
 import { Property, Interaction, RecommendationFilters, RecommendedProperty } from '../types/index.js';
 
+const GEMINI_MODEL = 'gemini-2.5-flash-lite';
+
 const CANDIDATE_POOL_SIZE = 20;
 
 const SYSTEM_PROMPT = `You are a real estate recommendation assistant. You analyze user interaction history to understand preferences and rank property candidates by relevance.
@@ -111,7 +113,7 @@ export const rankWithLLM = async (
   const prompt = buildRankingPrompt(candidatePool, interactions);
 
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
+    model: GEMINI_MODEL,
     contents: [
       { role: 'user', parts: [{ text: `${SYSTEM_PROMPT}\n\n${prompt}` }] },
     ],
@@ -143,7 +145,7 @@ export const generateExplanations = async (
       const prompt = buildExplanationPrompt(rec.property, interactions);
 
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: GEMINI_MODEL,
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
         config: { temperature: 0.5, maxOutputTokens: 50 },
       });

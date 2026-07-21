@@ -8,6 +8,8 @@ const debug = (label: string, data?: unknown) => {
   console.log(`[CHAT-DEBUG ${ts}] ${label}${extra}`);
 };
 
+const GEMINI_MODEL = 'gemini-2.5-flash-lite';
+
 const SYSTEM_PROMPT = `You are a helpful real estate assistant for Rentivo, a property rental platform in New York City.
 
 AVAILABLE TOOLS — call them by writing a <tool_call> block (exactly this format, on its own lines):
@@ -59,10 +61,10 @@ const streamToString = async function* (
   msgs: { role: string; content: string }[]
 ): AsyncGenerator<string> {
   const { systemInstruction, contents } = toGeminiContents(msgs);
-  debug('streamToString: calling generateContentStream', { model: 'gemini-2.5-flash', contentsCount: contents.length });
+  debug('streamToString: calling generateContentStream', { model: GEMINI_MODEL, contentsCount: contents.length });
 
   const stream = await ai.models.generateContentStream({
-    model: 'gemini-2.5-flash',
+    model: GEMINI_MODEL,
     contents,
     config: { systemInstruction },
   });
@@ -153,7 +155,7 @@ export const sendMessage = async function* (
       const { systemInstruction, contents } = toGeminiContents(followUpMessages);
 
       const followUpStream = await ai.models.generateContentStream({
-        model: 'gemini-2.5-flash',
+        model: GEMINI_MODEL,
         contents,
         config: { systemInstruction },
       });
@@ -190,9 +192,9 @@ ${JSON.stringify(history.slice(-4), null, 2)}
 Return ONLY a JSON object: {"suggestions": ["question 1", "question 2", "question 3"]}`;
 
   try {
-    debug('generateFollowUpSuggestions: calling generateContent', { model: 'gemini-2.5-flash' });
+    debug('generateFollowUpSuggestions: calling generateContent', { model: GEMINI_MODEL });
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: GEMINI_MODEL,
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       config: { responseMimeType: 'application/json' },
     });
