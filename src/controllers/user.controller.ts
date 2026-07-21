@@ -3,6 +3,33 @@ import { getCollections } from '../lib/db/collections.js';
 import { ObjectId } from 'mongodb';
 import { logControllerError } from '../lib/logger.js';
 
+export const getMe = async (req: Request, res: Response) => {
+  try {
+    const { users } = await getCollections();
+    const userId = req.user!.id;
+
+    const user = await users.findOne(
+      { _id: new ObjectId(userId) },
+      { projection: { passwordHash: 0 } }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'RESOURCE_NOT_FOUND', message: 'User not found' },
+      });
+    }
+
+    res.json({ success: true, data: { user } });
+  } catch (error) {
+    logControllerError(req, error, 'getMe');
+    res.status(500).json({
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch user' },
+    });
+  }
+};
+
 export const upgradeToOwner = async (req: Request, res: Response) => {
   try {
     const { users } = await getCollections();
