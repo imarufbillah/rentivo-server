@@ -1,6 +1,6 @@
 # Rentivo Server
 
-RESTful API backend for Rentivo — an AI-powered property rental platform. Built with Express 5, TypeScript, MongoDB, and Groq LLM.
+RESTful API backend for Rentivo — an AI-powered property rental platform. Built with Express 5, TypeScript, MongoDB, and Gemini AI.
 
 ## Tech Stack
 
@@ -11,7 +11,7 @@ RESTful API backend for Rentivo — an AI-powered property rental platform. Buil
 | Language | TypeScript 6 (node16 ESM) |
 | Database | MongoDB 7 (native driver) |
 | Auth | Better Auth + JWT (jose) |
-| AI | Groq SDK (Llama 3) |
+| AI | Google GenAI SDK (Gemini 2.5 Flash) |
 | Payments | Stripe |
 | Validation | Zod 4 |
 | Testing | Vitest + Supertest |
@@ -86,8 +86,8 @@ CLIENT_URL=http://localhost:3000
 # JWT
 JWT_SECRET=your-secret-key
 
-# Groq (AI)
-GROQ_API_KEY=gsk_...
+# Gemini (AI)
+GEMINI_API_KEY=your-gemini-api-key
 
 # Stripe
 STRIPE_SECRET_KEY=sk_test_...

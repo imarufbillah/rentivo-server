@@ -1,4 +1,5 @@
 import { ObjectId, Filter } from 'mongodb';
+import { GoogleGenAI } from '@google/genai';
 import { getCollections } from '../lib/db/collections.js';
 import { Property, Interaction, RecommendationFilters, RecommendedProperty } from '../types/index.js';
 
@@ -105,22 +106,19 @@ export const rankWithLLM = async (
   candidatePool: Property[],
   interactions: Interaction[]
 ): Promise<RecommendedProperty[]> => {
-  const groq = (await import('groq-sdk')).default;
-  const client = new groq({ apiKey: process.env.GROQ_API_KEY });
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
   const prompt = buildRankingPrompt(candidatePool, interactions);
 
-  const response = await client.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
-    messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: prompt },
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: [
+      { role: 'user', parts: [{ text: `${SYSTEM_PROMPT}\n\n${prompt}` }] },
     ],
-    temperature: 0.3,
-    max_tokens: 1024,
+    config: { temperature: 0.3, maxOutputTokens: 1024 },
   });
 
-  const content = response.choices[0]?.message?.content || '[]';
+  const content = response.text || '[]';
   const ranked = JSON.parse(content) as Array<{ id: string; score?: number }>;
 
   const propertyMap = new Map(candidatePool.map((p) => [p._id?.toString(), p]));
@@ -138,21 +136,19 @@ export const generateExplanations = async (
   rankedProperties: RecommendedProperty[],
   interactions: Interaction[]
 ): Promise<RecommendedProperty[]> => {
-  const groq = (await import('groq-sdk')).default;
-  const client = new groq({ apiKey: process.env.GROQ_API_KEY });
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
   const results = await Promise.allSettled(
     rankedProperties.map(async (rec) => {
       const prompt = buildExplanationPrompt(rec.property, interactions);
 
-      const response = await client.chat.completions.create({
-        model: 'llama-3.3-70b-versatile',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.5,
-        max_tokens: 50,
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        config: { temperature: 0.5, maxOutputTokens: 50 },
       });
 
-      const explanation = response.choices[0]?.message?.content?.trim() || '';
+      const explanation = (response.text || '').trim();
       return { ...rec, explanation };
     })
   );

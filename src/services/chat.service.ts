@@ -1,3 +1,4 @@
+import { GoogleGenAI } from '@google/genai';
 import { ChatMessage } from '../types/index.js';
 import { executeToolCall } from './chat-tools.js';
 
@@ -26,28 +27,44 @@ RULES:
 
 const TOOL_CALL_REGEX = /<tool_call>\s*([\s\S]*?)\s*<\/tool_call>/g;
 
-const createClient = async () => {
-  const Groq = (await import('groq-sdk')).default;
-  return new Groq({ apiKey: process.env.GROQ_API_KEY });
+const getAIClient = () => {
+  return new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+};
+
+const toGeminiContents = (
+  messages: { role: string; content: string }[]
+): { systemInstruction: string; contents: { role: string; parts: { text: string }[] }[] } => {
+  const systemMsg = messages.find((m) => m.role === 'system');
+  const nonSystem = messages.filter((m) => m.role !== 'system');
+
+  return {
+    systemInstruction: systemMsg?.content || '',
+    contents: nonSystem.map((m) => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }],
+    })),
+  };
 };
 
 const streamToString = async function* (
-  client: Awaited<ReturnType<typeof createClient>>,
+  ai: GoogleGenAI,
   msgs: { role: string; content: string }[]
 ): AsyncGenerator<string> {
-  const stream = await client.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
-    messages: msgs as any,
-    stream: true,
+  const { systemInstruction, contents } = toGeminiContents(msgs);
+
+  const stream = await ai.models.generateContentStream({
+    model: 'gemini-2.5-flash',
+    contents,
+    config: { systemInstruction },
   });
 
   let fullContent = '';
 
   for await (const chunk of stream) {
-    const delta = chunk.choices[0]?.delta;
-    if (delta?.content) {
-      fullContent += delta.content;
-      yield JSON.stringify({ type: 'token', content: delta.content });
+    const text = chunk.text;
+    if (text) {
+      fullContent += text;
+      yield JSON.stringify({ type: 'token', content: text });
     }
   }
 
@@ -59,7 +76,7 @@ export const sendMessage = async function* (
   message: string,
   history: ChatMessage[]
 ): AsyncGenerator<string> {
-  const client = await createClient();
+  const ai = getAIClient();
 
   const messages: { role: string; content: string }[] = [
     { role: 'system', content: SYSTEM_PROMPT },
@@ -70,7 +87,7 @@ export const sendMessage = async function* (
   let fullContent = '';
 
   try {
-    const result = yield* streamToString(client, messages);
+    const result = yield* streamToString(ai, messages);
     fullContent = result || '';
   } catch {
     yield JSON.stringify({ type: 'done' });
@@ -109,23 +126,25 @@ export const sendMessage = async function* (
       }
     }
 
-    const followUpMessages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
+    const followUpMessages: { role: string; content: string }[] = [
       { role: 'system', content: 'You received property data from tools. Format and present ONLY the properties from these results as a numbered list. Do NOT invent any additional properties. If results are empty, say "No properties match those criteria." Format: Title, Location, $Price/mo, Type.' },
-      ...messages.filter((m) => m.role !== 'system').map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+      ...messages.filter((m) => m.role !== 'system'),
       { role: 'user', content: `Tool results:\n${toolResults.join('\n')}\n\nPresent these results to the user now.` },
     ];
 
     try {
-      const followUp = await client.chat.completions.create({
-        model: 'llama-3.3-70b-versatile',
-        messages: followUpMessages as any,
-        stream: true,
+      const { systemInstruction, contents } = toGeminiContents(followUpMessages);
+
+      const followUpStream = await ai.models.generateContentStream({
+        model: 'gemini-2.5-flash',
+        contents,
+        config: { systemInstruction },
       });
 
-      for await (const chunk of followUp) {
-        const delta = chunk.choices[0]?.delta;
-        if (delta?.content && !delta.content.includes('<tool_call>')) {
-          yield JSON.stringify({ type: 'token', content: delta.content });
+      for await (const chunk of followUpStream) {
+        const text = chunk.text;
+        if (text && !text.includes('<tool_call>')) {
+          yield JSON.stringify({ type: 'token', content: text });
         }
       }
     } catch {
@@ -140,7 +159,7 @@ export const sendMessage = async function* (
 };
 
 export const generateFollowUpSuggestions = async (history: ChatMessage[]): Promise<string[]> => {
-  const client = await createClient();
+  const ai = getAIClient();
 
   const prompt = `Based on this conversation about rental properties, suggest 2-3 short follow-up questions the user might ask (max 8 words each).
 
@@ -150,13 +169,13 @@ ${JSON.stringify(history.slice(-4), null, 2)}
 Return ONLY a JSON object: {"suggestions": ["question 1", "question 2", "question 3"]}`;
 
   try {
-    const response = await client.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
-      messages: [{ role: 'user', content: prompt }],
-      response_format: { type: 'json_object' },
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      config: { responseMimeType: 'application/json' },
     });
 
-    const result = JSON.parse(response.choices[0]?.message?.content || '{"suggestions":[]}');
+    const result = JSON.parse(response.text || '{"suggestions":[]}');
     return result.suggestions || [];
   } catch {
     return [];

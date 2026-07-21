@@ -39,7 +39,9 @@ export const sendMessage = async (req: Request, res: Response) => {
     }
 
     const isLLMError = error instanceof Error && (
-      error.message.includes('groq') ||
+      error.message.includes('google') ||
+      error.message.includes('generativelanguage') ||
+      error.message.includes('GEMINI') ||
       error.message.includes('ECONNREFUSED') ||
       error.message.includes('ENOTFOUND') ||
       error.message.includes('503') ||

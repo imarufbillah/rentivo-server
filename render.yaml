@@ -12,7 +12,7 @@ services:
         sync: false
       - key: JWT_SECRET
         generateValue: true
-      - key: GROQ_API_KEY
+      - key: GEMINI_API_KEY
         sync: false
       - key: AUTH_BASE_URL
         sync: false
