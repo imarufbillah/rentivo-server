@@ -8,7 +8,7 @@ const debug = (label: string, data?: unknown) => {
   console.log(`[CHAT-DEBUG ${ts}] ${label}${extra}`);
 };
 
-const GEMINI_MODEL = 'gemini-2.5-flash-lite';
+const GEMINI_MODEL = 'gemini-3.5-flash-lite';
 
 const SYSTEM_PROMPT = `You are a helpful real estate assistant for Rentivo, a property rental platform in New York City.
 

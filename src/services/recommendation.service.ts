@@ -3,7 +3,7 @@ import { GoogleGenAI } from '@google/genai';
 import { getCollections } from '../lib/db/collections.js';
 import { Property, Interaction, RecommendationFilters, RecommendedProperty } from '../types/index.js';
 
-const GEMINI_MODEL = 'gemini-2.5-flash-lite';
+const GEMINI_MODEL = 'gemini-3.5-flash-lite';
 
 const CANDIDATE_POOL_SIZE = 20;
 
