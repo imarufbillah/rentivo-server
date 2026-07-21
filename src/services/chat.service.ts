@@ -2,6 +2,12 @@ import { GoogleGenAI } from '@google/genai';
 import { ChatMessage } from '../types/index.js';
 import { executeToolCall } from './chat-tools.js';
 
+const debug = (label: string, data?: unknown) => {
+  const ts = new Date().toISOString();
+  const extra = data !== undefined ? ` ${JSON.stringify(data, null, 2)}` : '';
+  console.log(`[CHAT-DEBUG ${ts}] ${label}${extra}`);
+};
+
 const SYSTEM_PROMPT = `You are a helpful real estate assistant for Rentivo, a property rental platform in New York City.
 
 AVAILABLE TOOLS — call them by writing a <tool_call> block (exactly this format, on its own lines):
@@ -28,7 +34,9 @@ RULES:
 const TOOL_CALL_REGEX = /<tool_call>\s*([\s\S]*?)\s*<\/tool_call>/g;
 
 const getAIClient = () => {
-  return new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  const key = process.env.GEMINI_API_KEY;
+  debug('getAIClient', { hasKey: !!key, keyPrefix: key ? key.substring(0, 8) + '...' : 'MISSING' });
+  return new GoogleGenAI({ apiKey: key });
 };
 
 const toGeminiContents = (
@@ -51,12 +59,15 @@ const streamToString = async function* (
   msgs: { role: string; content: string }[]
 ): AsyncGenerator<string> {
   const { systemInstruction, contents } = toGeminiContents(msgs);
+  debug('streamToString: calling generateContentStream', { model: 'gemini-2.5-flash', contentsCount: contents.length });
 
   const stream = await ai.models.generateContentStream({
     model: 'gemini-2.5-flash',
     contents,
     config: { systemInstruction },
   });
+
+  debug('streamToString: stream created, iterating chunks');
 
   let fullContent = '';
 
@@ -68,6 +79,7 @@ const streamToString = async function* (
     }
   }
 
+  debug('streamToString: done, fullContent length', { length: fullContent.length });
   return fullContent;
 };
 
@@ -76,6 +88,7 @@ export const sendMessage = async function* (
   message: string,
   history: ChatMessage[]
 ): AsyncGenerator<string> {
+  debug('sendMessage: called', { userId, message: message.substring(0, 100), historyLength: history.length });
   const ai = getAIClient();
 
   const messages: { role: string; content: string }[] = [
@@ -89,7 +102,11 @@ export const sendMessage = async function* (
   try {
     const result = yield* streamToString(ai, messages);
     fullContent = result || '';
-  } catch {
+  } catch (error) {
+    debug('sendMessage: streamToString ERROR', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     yield JSON.stringify({ type: 'done' });
     return;
   }
@@ -147,7 +164,11 @@ export const sendMessage = async function* (
           yield JSON.stringify({ type: 'token', content: text });
         }
       }
-    } catch {
+    } catch (error) {
+      debug('sendMessage: followUp stream ERROR', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       yield JSON.stringify({
         type: 'token',
         content: '\n\nI found some results but had trouble summarizing them. Please try asking again.',
@@ -169,15 +190,21 @@ ${JSON.stringify(history.slice(-4), null, 2)}
 Return ONLY a JSON object: {"suggestions": ["question 1", "question 2", "question 3"]}`;
 
   try {
+    debug('generateFollowUpSuggestions: calling generateContent', { model: 'gemini-2.5-flash' });
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       config: { responseMimeType: 'application/json' },
     });
 
+    debug('generateFollowUpSuggestions: response received', { text: response.text?.substring(0, 200) });
     const result = JSON.parse(response.text || '{"suggestions":[]}');
     return result.suggestions || [];
-  } catch {
+  } catch (error) {
+    debug('generateFollowUpSuggestions: ERROR', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return [];
   }
 };
